@@ -93,7 +93,7 @@ export function TaskOverview(props: IDispatchReceiver) {
                         <Toolbar>
                             <ContextsButton dispatch={props.dispatch} />
                             <ProjectsButton dispatch={props.dispatch} />
-                            <TagsButton tags={[]} />
+                            <TagsButton dispatch={props.dispatch} />
                             <div className={classes.search}>
                                 <div className={classes.searchIcon}>
                                     <Search />

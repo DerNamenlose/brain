@@ -23,7 +23,11 @@ import { copyAndUpdate } from '../util/copyUpdater';
 import { sortAndUnique, sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { IDispatchReceiver, ITaskAction } from '../util/dispatcher';
-import { GlobalState, extractContexts } from '../model/GlobalState';
+import {
+    GlobalState,
+    extractContexts,
+    extractProjects
+} from '../model/GlobalState';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -138,10 +142,47 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                     'contexts',
                                     newValue
                                 );
-                                console.log(nv);
                                 setEditedTask(nv);
                             }}
                             values={editedTask.contexts}
+                        />
+                        <ReactSelectMaterialUi
+                            label='Projects'
+                            options={sortAndUniqueString(
+                                extractProjects(state.tasks)
+                                    .concat(editedTask.projects || [])
+                                    .map(project => project)
+                            )}
+                            SelectProps={{ isCreatable: true, isMulti: true }}
+                            fullWidth={true}
+                            onChange={(newValue: any) => {
+                                const nv = copyAndUpdate(
+                                    editedTask,
+                                    'projects',
+                                    newValue
+                                );
+                                setEditedTask(nv);
+                            }}
+                            values={editedTask.projects}
+                        />
+                        <ReactSelectMaterialUi
+                            label='Tags'
+                            options={sortAndUniqueString(
+                                extractProjects(state.tasks)
+                                    .concat(editedTask.tags || [])
+                                    .map(project => project)
+                            )}
+                            SelectProps={{ isCreatable: true, isMulti: true }}
+                            fullWidth={true}
+                            onChange={(newValue: any) => {
+                                const nv = copyAndUpdate(
+                                    editedTask,
+                                    'tags',
+                                    newValue
+                                );
+                                setEditedTask(nv);
+                            }}
+                            values={editedTask.tags}
                         />
                         <ButtonGroup className={classes.buttons}>
                             <ResponsiveButton

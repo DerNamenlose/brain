@@ -12,7 +12,7 @@ export function ProjectsButton(props: IDispatchReceiver) {
                     icon={<TableChartIcon />}
                     text='Projects'
                     entries={extractProjects(state.tasks).map(project => ({
-                        text: project.title,
+                        text: project,
                         selected: false
                     }))}
                 />

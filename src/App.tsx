@@ -10,16 +10,8 @@ import { Task } from './model/Task';
 import { Guid } from 'guid-typescript';
 import { TaskOverview } from './components/TaskOverview';
 import { TaskEditor } from './components/TaskEditor';
-import {
-    IAction,
-    IDispatchReceiver,
-    ITaskAction,
-    IContextAction,
-    reducer
-} from './util/dispatcher';
+import { IDispatchReceiver, reducer } from './util/dispatcher';
 import { IGlobalState, GlobalState } from './model/GlobalState';
-import { sortAndUnique } from './util/order';
-import { Project } from './model/Project';
 
 function FindTask(props: IDispatchReceiver) {
     const { id } = useParams();
@@ -36,7 +28,7 @@ const App: React.FC = () => {
     const [state, dispatch] = useReducer(reducer, {
         tasks: [] as Task[],
         selectedContexts: [] as string[],
-        selectedProjects: [] as Project[],
+        selectedProjects: [] as string[],
         selectedTags: [] as string[]
     } as IGlobalState);
     return (

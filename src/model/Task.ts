@@ -1,5 +1,4 @@
 import { Guid } from 'guid-typescript';
-import { Project } from './Project';
 
 export interface Task {
     id: Guid;
@@ -8,6 +7,6 @@ export interface Task {
     due?: Date;
     done?: boolean;
     contexts?: string[];
-    projects?: Project[];
+    projects?: string[];
     tags?: string[];
 }
