@@ -1,26 +1,67 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useReducer, useContext } from 'react';
+import {
+    BrowserRouter as Router,
+    Route,
+    Switch,
+    useParams
+} from 'react-router-dom';
 import './App.css';
+import { Task } from './model/Task';
+import { Guid } from 'guid-typescript';
+import { TaskOverview } from './components/TaskOverview';
+import { TaskEditor } from './components/TaskEditor';
+import {
+    IAction,
+    IDispatchReceiver,
+    ITaskAction,
+    IContextAction,
+    reducer
+} from './util/dispatcher';
+import { IGlobalState, GlobalState } from './model/GlobalState';
+import { sortAndUnique } from './util/order';
+import { Project } from './model/Project';
+
+function FindTask(props: IDispatchReceiver) {
+    const { id } = useParams();
+    const taskId = id && Guid.parse(id);
+    const state = useContext(GlobalState);
+
+    const task: Task =
+        (taskId && state.tasks.find(t => t.id.equals(taskId))) ||
+        ({ id: Guid.create() } as Task);
+    return <TaskEditor task={task} dispatch={props.dispatch} />;
+}
 
 const App: React.FC = () => {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    const [state, dispatch] = useReducer(reducer, {
+        tasks: [] as Task[],
+        selectedContexts: [] as string[],
+        selectedProjects: [] as Project[],
+        selectedTags: [] as string[]
+    } as IGlobalState);
+    return (
+        <Router>
+            <GlobalState.Provider value={state}>
+                <div className='App'>
+                    <Switch>
+                        <Route exact path='/'>
+                            <TaskOverview dispatch={dispatch} />
+                        </Route>
+                        <Route path='/task/:id'>
+                            <FindTask dispatch={dispatch} />
+                        </Route>
+                        <Route path='/newTask'>
+                            <TaskEditor
+                                task={{ id: Guid.create(), title: '' }}
+                                isNew
+                                dispatch={dispatch}
+                            />
+                        </Route>
+                    </Switch>
+                </div>
+            </GlobalState.Provider>
+        </Router>
+    );
+};
 
 export default App;
