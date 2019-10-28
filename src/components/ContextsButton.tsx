@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import LandscapeIcon from '@material-ui/icons/Landscape';
 import { FilterButton } from './FilterButton';
 import { IDispatchReceiver, IContextAction } from '../util/dispatcher';
-import { GlobalState, extractContexts } from '../model/GlobalState';
+import { GlobalState } from '../model/GlobalState';
 
 /**
  * The contexts menu button
@@ -16,15 +16,16 @@ export function ContextsButton(props: IDispatchReceiver) {
                 <FilterButton
                     icon={<LandscapeIcon />}
                     text='Contexts'
-                    entries={extractContexts(state.tasks).map(ctx => ({
+                    entries={state.contexts.map(ctx => ({
                         text: ctx,
                         selected: !!state.selectedContexts.find(c => c === ctx)
                     }))}
                     onChange={selectedEntry => {
                         props.dispatch({
-                            type: selectedEntry.selected
-                                ? 'context.deselect'
-                                : 'context.select',
+                            type: 'context',
+                            subtype: selectedEntry.selected
+                                ? 'deselect'
+                                : 'select',
                             context: selectedEntry.text
                         } as IContextAction);
                     }}

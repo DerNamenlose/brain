@@ -27,6 +27,9 @@ function FindTask(props: IDispatchReceiver) {
 const App: React.FC = () => {
     const [state, dispatch] = useReducer(reducer, {
         tasks: [] as Task[],
+        contexts: [] as string[],
+        projects: [] as string[],
+        tags: [] as string[],
         selectedContexts: [] as string[],
         selectedProjects: [] as string[],
         selectedTags: [] as string[]

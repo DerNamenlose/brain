@@ -1,7 +1,7 @@
 import React from 'react';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import { FilterButton } from './FilterButton';
-import { GlobalState, extractTags } from '../model/GlobalState';
+import { GlobalState } from '../model/GlobalState';
 import { IDispatchReceiver } from '../util/dispatcher';
 
 /**
@@ -16,7 +16,7 @@ export function TagsButton(props: IDispatchReceiver) {
                 <FilterButton
                     icon={<LocalOfferIcon />}
                     text='Tags'
-                    entries={extractTags(state.tasks).map(tag => ({
+                    entries={state.tags.map(tag => ({
                         text: tag,
                         selected: false
                     }))}

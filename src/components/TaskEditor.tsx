@@ -20,14 +20,10 @@ import { ResponsiveButton } from './ResponsiveButton';
 import { useHistory } from 'react-router-dom';
 import ReactSelectMaterialUi from 'react-select-material-ui';
 import { copyAndUpdate } from '../util/copyUpdater';
-import { sortAndUnique, sortAndUniqueString } from '../util/order';
+import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { IDispatchReceiver, ITaskAction } from '../util/dispatcher';
-import {
-    GlobalState,
-    extractContexts,
-    extractProjects
-} from '../model/GlobalState';
+import { GlobalState } from '../model/GlobalState';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -130,9 +126,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                         <ReactSelectMaterialUi
                             label='Contexts'
                             options={sortAndUniqueString(
-                                extractContexts(state.tasks).concat(
-                                    editedTask.contexts || []
-                                )
+                                state.contexts.concat(editedTask.contexts || [])
                             )}
                             SelectProps={{ isCreatable: true, isMulti: true }}
                             fullWidth={true}
@@ -149,9 +143,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                         <ReactSelectMaterialUi
                             label='Projects'
                             options={sortAndUniqueString(
-                                extractProjects(state.tasks)
-                                    .concat(editedTask.projects || [])
-                                    .map(project => project)
+                                state.projects.concat(editedTask.projects || [])
                             )}
                             SelectProps={{ isCreatable: true, isMulti: true }}
                             fullWidth={true}
@@ -168,9 +160,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                         <ReactSelectMaterialUi
                             label='Tags'
                             options={sortAndUniqueString(
-                                extractProjects(state.tasks)
-                                    .concat(editedTask.tags || [])
-                                    .map(project => project)
+                                state.tags.concat(editedTask.tags || [])
                             )}
                             SelectProps={{ isCreatable: true, isMulti: true }}
                             fullWidth={true}
@@ -197,9 +187,10 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                         setValidation(res);
                                     } else {
                                         props.dispatch({
-                                            type: props.isNew
-                                                ? 'task.create'
-                                                : 'task.update',
+                                            type: 'task',
+                                            subtype: props.isNew
+                                                ? 'create'
+                                                : 'update',
                                             task: editedTask
                                         } as ITaskAction);
                                         history.goBack();
