@@ -3,6 +3,7 @@ import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
 import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';
+import { Badge } from '@material-ui/core';
 
 /**
  * The tags menu button
@@ -14,7 +15,14 @@ export function TagsButton(props: IDispatchReceiver) {
         <GlobalState.Consumer>
             {state => (
                 <FilterButton
-                    icon={<LocalOfferIcon />}
+                    icon={
+                        <Badge
+                            invisible={state.selectedTags.length === 0}
+                            color='secondary'
+                            variant='dot'>
+                            <LocalOfferIcon />
+                        </Badge>
+                    }
                     text='Tags'
                     entries={state.tags.map(tag => ({
                         text: tag,

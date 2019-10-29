@@ -3,6 +3,7 @@ import LandscapeIcon from '@material-ui/icons/Landscape';
 import { FilterButton } from './FilterButton';
 import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
+import { Badge } from '@material-ui/core';
 
 /**
  * The contexts menu button
@@ -14,7 +15,14 @@ export function ContextsButton(props: IDispatchReceiver) {
         <GlobalState.Consumer>
             {state => (
                 <FilterButton
-                    icon={<LandscapeIcon />}
+                    icon={
+                        <Badge
+                            invisible={state.selectedContexts.length === 0}
+                            color='secondary'
+                            variant='dot'>
+                            <LandscapeIcon />
+                        </Badge>
+                    }
                     text='Contexts'
                     entries={state.contexts.map(ctx => ({
                         text: ctx,
