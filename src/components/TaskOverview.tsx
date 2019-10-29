@@ -116,7 +116,12 @@ export function TaskOverview(props: IDispatchReceiver) {
                         </Fab>
                     </AppBar>
                     <List>
-                        {applyFilter(state.tasks, state.selectedContexts)
+                        {applyFilter(
+                            state.tasks,
+                            state.selectedContexts,
+                            state.selectedProjects,
+                            state.selectedTags
+                        )
                             .sort(orderByDone)
                             .map(task => (
                                 <TaskListItem

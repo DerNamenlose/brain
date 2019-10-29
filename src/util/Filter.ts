@@ -1,17 +1,27 @@
 import { Task } from '../model/Task';
 
-export function applyFilter(tasks: Task[], selectedContexts: string[]) {
-    if (selectedContexts.length === 0) {
-        return tasks;
-    }
-    return tasks.filter(task => {
-        return (
-            task.contexts &&
-            task.contexts.reduce(
-                (found: boolean, ctx: string) =>
-                    found || !!selectedContexts.find(sctx => sctx === ctx),
+function matches(filterProperties: string[], taskProperties?: string[]) {
+    return (
+        filterProperties.length == 0 ||
+        (taskProperties &&
+            taskProperties.reduce(
+                (found: boolean, prop: string) =>
+                    found || !!filterProperties.find(fprop => fprop === prop),
                 false
-            )
-        );
-    });
+            ))
+    );
+}
+
+export function applyFilter(
+    tasks: Task[],
+    selectedContexts: string[],
+    selectedProjects: string[],
+    selectedTags: string[]
+): Task[] {
+    return tasks.filter(
+        task =>
+            matches(selectedContexts, task.contexts) &&
+            matches(selectedProjects, task.projects) &&
+            matches(selectedTags, task.tags)
+    );
 }
