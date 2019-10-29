@@ -94,18 +94,6 @@ export function TaskOverview(props: IDispatchReceiver) {
                             <ContextsButton dispatch={props.dispatch} />
                             <ProjectsButton dispatch={props.dispatch} />
                             <TagsButton dispatch={props.dispatch} />
-                            <div className={classes.search}>
-                                <div className={classes.searchIcon}>
-                                    <Search />
-                                </div>
-                                <InputBase
-                                    classes={{
-                                        root: classes.inputRoot,
-                                        input: classes.inputInput
-                                    }}
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                            </div>
                         </Toolbar>
                         <Fab
                             color='secondary'
