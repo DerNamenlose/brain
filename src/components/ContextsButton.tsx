@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React from 'react';
 import LandscapeIcon from '@material-ui/icons/Landscape';
 import { FilterButton } from './FilterButton';
 import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';

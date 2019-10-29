@@ -2,7 +2,7 @@ import { Task } from '../model/Task';
 
 function matches(filterProperties: string[], taskProperties?: string[]) {
     return (
-        filterProperties.length == 0 ||
+        filterProperties.length === 0 ||
         (taskProperties &&
             taskProperties.reduce(
                 (found: boolean, prop: string) =>

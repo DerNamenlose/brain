@@ -3,7 +3,6 @@ import React from 'react';
 import {
     AppBar,
     Toolbar,
-    InputBase,
     Fab,
     List,
     makeStyles,
@@ -15,12 +14,10 @@ import { ProjectsButton } from './ProjectsButton';
 import { TagsButton } from './TagsButton';
 import { TaskListItem } from './TaskListItem';
 import AddIcon from '@material-ui/icons/Add';
-import Search from '@material-ui/icons/Search';
 import { fade } from '@material-ui/core/styles';
 import { useHistory } from 'react-router';
 import { orderByDone } from '../util/order';
 import { IDispatchReceiver } from '../util/dispatcher';
-import { Task } from '../model/Task';
 import { applyFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
 

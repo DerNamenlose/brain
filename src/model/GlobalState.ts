@@ -1,6 +1,5 @@
 import { Task } from './Task';
 import React from 'react';
-import { sortAndUnique, sortAndUniqueString } from '../util/order';
 
 export interface IGlobalState {
     tasks: Task[];
