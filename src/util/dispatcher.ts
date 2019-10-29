@@ -8,34 +8,53 @@ export interface ITaskAction {
     task: Task;
 }
 
-export interface IContextAction {
-    type: 'context';
+export interface IFilterAction {
+    type: 'context' | 'project' | 'tag';
     subtype: 'select' | 'deselect';
-    context: string;
+    name: string;
 }
 
 export interface IDispatchReceiver {
-    dispatch: React.Dispatch<ITaskAction | IContextAction>;
+    dispatch: React.Dispatch<ITaskAction | IFilterAction>;
 }
 
-function handleContextAction(
+function handleFilterAction(
     newState: IGlobalState,
-    action: IContextAction
+    action: IFilterAction
 ): IGlobalState {
+    let items: string[] = [];
+    switch (action.type) {
+        case 'context':
+            items = [...newState.selectedContexts];
+            break;
+        case 'project':
+            items = [...newState.selectedProjects];
+            break;
+        case 'tag':
+            items = [...newState.selectedTags];
+            break;
+    }
     switch (action.subtype) {
         case 'select':
-            newState.selectedContexts.push(action.context);
-            newState.selectedContexts = sortAndUniqueString(
-                newState.selectedContexts
-            );
+            items.push(action.name);
+            items = sortAndUniqueString(items);
             break;
         case 'deselect':
-            var idx = newState.selectedContexts.findIndex(
-                ctx => ctx === action.context
-            );
+            var idx = items.findIndex(ctx => ctx === action.name);
             if (idx !== -1) {
-                newState.selectedContexts.splice(idx, 1);
+                items.splice(idx, 1);
             }
+            break;
+    }
+    switch (action.type) {
+        case 'context':
+            newState.selectedContexts = items;
+            break;
+        case 'project':
+            newState.selectedProjects = items;
+            break;
+        case 'tag':
+            newState.selectedTags = items;
             break;
     }
     return newState;
@@ -80,13 +99,15 @@ function handleTaskAction(newState: IGlobalState, action: ITaskAction) {
  */
 export function reducer(
     state: IGlobalState,
-    action: ITaskAction | IContextAction
+    action: ITaskAction | IFilterAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
     switch (action.type) {
         case 'context':
-            return handleContextAction(newState, action as IContextAction);
+        case 'project':
+        case 'tag':
+            return handleFilterAction(newState, action as IFilterAction);
         case 'task':
             return handleTaskAction(newState, action as ITaskAction);
     }

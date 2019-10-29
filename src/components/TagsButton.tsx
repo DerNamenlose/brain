@@ -2,7 +2,7 @@ import React from 'react';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
-import { IDispatchReceiver } from '../util/dispatcher';
+import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';
 
 /**
  * The tags menu button
@@ -18,8 +18,17 @@ export function TagsButton(props: IDispatchReceiver) {
                     text='Tags'
                     entries={state.tags.map(tag => ({
                         text: tag,
-                        selected: false
+                        selected: !!state.selectedTags.find(t => t === tag)
                     }))}
+                    onChange={selectedEntry => {
+                        props.dispatch({
+                            type: 'tag',
+                            subtype: selectedEntry.selected
+                                ? 'deselect'
+                                : 'select',
+                            name: selectedEntry.text
+                        } as IFilterAction);
+                    }}
                 />
             )}
         </GlobalState.Consumer>

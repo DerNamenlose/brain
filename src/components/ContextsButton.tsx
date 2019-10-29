@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import LandscapeIcon from '@material-ui/icons/Landscape';
 import { FilterButton } from './FilterButton';
-import { IDispatchReceiver, IContextAction } from '../util/dispatcher';
+import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
 
 /**
@@ -26,8 +26,8 @@ export function ContextsButton(props: IDispatchReceiver) {
                             subtype: selectedEntry.selected
                                 ? 'deselect'
                                 : 'select',
-                            context: selectedEntry.text
-                        } as IContextAction);
+                            name: selectedEntry.text
+                        } as IFilterAction);
                     }}
                 />
             )}
