@@ -1,4 +1,4 @@
-import React, { useReducer, useContext } from 'react';
+import React, { useReducer, useContext, useEffect } from 'react';
 import {
     BrowserRouter as Router,
     Route,
@@ -12,6 +12,7 @@ import { TaskOverview } from './components/TaskOverview';
 import { TaskEditor } from './components/TaskEditor';
 import { IDispatchReceiver, reducer } from './util/dispatcher';
 import { IGlobalState, GlobalState } from './model/GlobalState';
+import { LocalStorage } from './storage/LocalStorage';
 
 function FindTask(props: IDispatchReceiver) {
     const { id } = useParams();
@@ -24,8 +25,10 @@ function FindTask(props: IDispatchReceiver) {
     return <TaskEditor task={task} dispatch={props.dispatch} />;
 }
 
+const storage = new LocalStorage();
+
 const App: React.FC = () => {
-    const [state, dispatch] = useReducer(reducer, {
+    const [state, dispatch] = useReducer(reducer.bind(null, storage), {
         tasks: [] as Task[],
         contexts: [] as string[],
         projects: [] as string[],
@@ -34,6 +37,15 @@ const App: React.FC = () => {
         selectedProjects: [] as string[],
         selectedTags: [] as string[]
     } as IGlobalState);
+    useEffect(() => {
+        storage
+            .loadTasks()
+            .then(tasks =>
+                tasks.forEach(task =>
+                    dispatch({ type: 'task', subtype: 'load', task: task })
+                )
+            );
+    }, []);
     return (
         <Router>
             <GlobalState.Provider value={state}>

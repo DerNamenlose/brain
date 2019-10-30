@@ -1,10 +1,11 @@
 import { Task } from '../model/Task';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
+import { LocalStorage } from '../storage/LocalStorage';
 
 export interface ITaskAction {
     type: 'task';
-    subtype: 'create' | 'update' | 'delete';
+    subtype: 'create' | 'update' | 'delete' | 'load';
     task: Task;
 }
 
@@ -60,10 +61,15 @@ function handleFilterAction(
     return newState;
 }
 
-function handleTaskAction(newState: IGlobalState, action: ITaskAction) {
+function handleTaskAction(
+    storage: LocalStorage,
+    newState: IGlobalState,
+    action: ITaskAction
+) {
     switch (action.subtype) {
         case 'create':
             newState.tasks.push(action.task);
+            storage.create(action.task);
             break;
         case 'update':
             const updateIdx = newState.tasks.findIndex(task =>
@@ -85,6 +91,9 @@ function handleTaskAction(newState: IGlobalState, action: ITaskAction) {
                 newState.tasks.splice(deleteIdx, 1);
             }
             break;
+        case 'load':
+            newState.tasks.push(action.task);
+            break;
     }
     newState.contexts = extractContexts(newState.tasks);
     newState.projects = extractProjects(newState.tasks);
@@ -98,6 +107,7 @@ function handleTaskAction(newState: IGlobalState, action: ITaskAction) {
  * @param action The action to update the global state
  */
 export function reducer(
+    storage: LocalStorage,
     state: IGlobalState,
     action: ITaskAction | IFilterAction
 ): IGlobalState {
@@ -109,7 +119,7 @@ export function reducer(
         case 'tag':
             return handleFilterAction(newState, action as IFilterAction);
         case 'task':
-            return handleTaskAction(newState, action as ITaskAction);
+            return handleTaskAction(storage, newState, action as ITaskAction);
     }
     return state;
 }
