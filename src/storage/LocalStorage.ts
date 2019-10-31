@@ -24,6 +24,14 @@ export class LocalStorage {
         await tx.done;
     }
 
+    public async update(task: Task): Promise<void> {
+        const db = await this.openDb();
+        const storedObject = { ...task, id: task.id.toString() };
+        const tx = db.transaction('tasks', 'readwrite');
+        await tx.objectStore('tasks').put(storedObject);
+        await tx.done;
+    }
+
     private async openDb() {
         const db = await openDB('tasks', 1, {
             upgrade(db, oldVersion, newVersion, transaction) {

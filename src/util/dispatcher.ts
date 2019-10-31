@@ -82,6 +82,7 @@ function handleTaskAction(
                     (action as ITaskAction).task
                 );
             }
+            storage.update(action.task);
             break;
         case 'delete':
             const deleteIdx = newState.tasks.findIndex(task =>
