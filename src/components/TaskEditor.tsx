@@ -174,6 +174,28 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                             }}
                             values={editedTask.tags}
                         />
+                        <FormControl>
+                            Due:
+                            <input
+                                type='date'
+                                value={
+                                    (editedTask.due &&
+                                        editedTask.due
+                                            .toISOString()
+                                            .slice(0, 10)) ||
+                                    ''
+                                }
+                                onChange={ev => {
+                                    console.log(ev.target.valueAsDate);
+                                    const nv = copyAndUpdate(
+                                        editedTask,
+                                        'due',
+                                        ev.target.valueAsDate
+                                    );
+                                    setEditedTask(nv);
+                                }}
+                            />
+                        </FormControl>
                         <ButtonGroup className={classes.buttons}>
                             <ResponsiveButton
                                 icon={<SaveIcon />}

@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import LandscapeIcon from '@material-ui/icons/Landscape';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
+import EventIcon from '@material-ui/icons/Event';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -18,7 +19,17 @@ const useStyles = makeStyles(theme =>
             color: theme.palette.grey[500]
         },
         metaEntry: {
-            marginLeft: '1em'
+            marginLeft: '0.5em',
+            whiteSpace: 'nowrap'
+        },
+        metaText: {
+            whiteSpace: 'normal'
+        },
+        dueToday: {
+            color: theme.palette.primary.main
+        },
+        overdue: {
+            color: theme.palette.error.main
         }
     })
 );
@@ -30,26 +41,52 @@ export interface TaskListItemProps {
     task: Task;
 }
 
+function DueClass(task: Task): string {
+    const classes = useStyles();
+    const today = new Date(Date.now()).toISOString().slice(0, 10);
+    const due = task.due && task.due.toISOString().slice(0, 10);
+    if (!due || due > today) {
+        return '';
+    }
+    if (due === today) {
+        return classes.dueToday;
+    }
+    return classes.overdue;
+}
+
 function MetaDisplay(props: { task: Task }) {
     const classes = useStyles();
     return (
         <Fragment>
             {props.task.contexts && props.task.contexts.length !== 0 && (
                 <span className={classes.metaEntry}>
-                    <LandscapeIcon fontSize='inherit' />{' '}
-                    {props.task.contexts.join(', ')}
+                    <LandscapeIcon fontSize='inherit' />
+                    <span className={classes.metaText}>
+                        {props.task.contexts.join(', ')}
+                    </span>
                 </span>
-            )}
+            )}{' '}
             {props.task.projects && props.task.projects.length !== 0 && (
                 <span className={classes.metaEntry}>
-                    <TableChartIcon fontSize='inherit' />{' '}
+                    <TableChartIcon fontSize='inherit' />
                     {props.task.projects.join(', ')}
                 </span>
-            )}
+            )}{' '}
             {props.task.tags && props.task.tags.length !== 0 && (
                 <span className={classes.metaEntry}>
-                    <LocalOfferIcon fontSize='inherit' />{' '}
-                    {props.task.tags.join(', ')}
+                    <LocalOfferIcon fontSize='inherit' />
+                    <span className={classes.metaText}>
+                        {props.task.tags.join(', ')}
+                    </span>
+                </span>
+            )}{' '}
+            {props.task.due && (
+                <span
+                    className={`${classes.metaEntry} ${DueClass(props.task)}`}>
+                    <EventIcon fontSize='inherit' />
+                    <span className={classes.metaText}>
+                        {props.task.due.toLocaleDateString()}
+                    </span>
                 </span>
             )}
         </Fragment>
