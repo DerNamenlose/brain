@@ -123,6 +123,18 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                 {editedTask.done ? 'Reopen?' : 'Finish?'}
                             </span>
                         </StateButton>
+                        <FormControl>
+                            <InputLabel htmlFor='Description'>
+                                Description
+                            </InputLabel>
+                            <Input
+                                id='description'
+                                multiline
+                                value={editedTask.description || ''}
+                                placeholder='Description'
+                                onChange={handleChange('description')}
+                            />
+                        </FormControl>
                         <ReactSelectMaterialUi
                             label='Contexts'
                             options={sortAndUniqueString(
