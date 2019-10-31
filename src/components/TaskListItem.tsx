@@ -34,19 +34,19 @@ function MetaDisplay(props: { task: Task }) {
     const classes = useStyles();
     return (
         <Fragment>
-            {props.task.contexts && (
+            {props.task.contexts && props.task.contexts.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LandscapeIcon fontSize='inherit' />{' '}
                     {props.task.contexts.join(', ')}
                 </span>
             )}
-            {props.task.projects && (
+            {props.task.projects && props.task.projects.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <TableChartIcon fontSize='inherit' />{' '}
                     {props.task.projects.join(', ')}
                 </span>
             )}
-            {props.task.tags && (
+            {props.task.tags && props.task.tags.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LocalOfferIcon fontSize='inherit' />{' '}
                     {props.task.tags.join(', ')}
