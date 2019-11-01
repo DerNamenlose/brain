@@ -1,0 +1,22 @@
+{
+    "name": "brain-backend",
+    "version": "0.1.0",
+    "description": "The task server for brain - Simply GTD®",
+    "main": "src/index.ts",
+    "scripts": {
+        "run": "ts-node-dev src/index.ts",
+        "build": "webpack",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": "https://repositories.geekbetrieb.de/namenlos/brain.git",
+    "author": "Markus Brueckner",
+    "private": true,
+    "dependencies": {
+        "config": "^3.2.4",
+        "express": "^4.17.1"
+    },
+    "devDependencies": {
+        "ts-node-dev": "^1.0.0-pre.43",
+        "typescript": "^3.6.4"
+    }
+}

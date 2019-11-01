@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:3000
+GET {{baseUrl}}/api
+
+###
+GET {{baseUrl}}/api/task
+
+###
+PUT {{baseUrl}}/api/task/{{$guid}}
+Content-Type: application/json
+
+{
+    "title" : "Some test title"
+}
