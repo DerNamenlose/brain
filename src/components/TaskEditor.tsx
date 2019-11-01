@@ -198,7 +198,6 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                     ''
                                 }
                                 onChange={ev => {
-                                    console.log(ev.target.valueAsDate);
                                     const nv = copyAndUpdate(
                                         editedTask,
                                         'due',
