@@ -1,28 +1,20 @@
-import { Task } from '../model/Task';
-
-const maxDate = new Date('9999-12-31');
-
-function orderDate(t1: Task, t2: Task) {
-    const t1due = t1.due || maxDate; // tasks without due date are assumed to be due at a ridiculously late date
-    const t2due = t2.due || maxDate;
-    if (t1due === t2due) {
-        return 0;
-    }
-    return t1due > t2due ? 1 : -1;
-}
+export const maxDate = new Date('9999-12-31');
 
 /**
- * Order task according to the configuration
+ * order objects by multiple fields
  *
- * @param t1 The first task
- * @param t2 The second task
+ * @param t1 The first object
+ * @param t2 The second object
  */
-export function order(t1: Task, t2: Task) {
-    // currently the order is fixed: done first, due second, priority (eventually) third
-    if (!!t1.done === !!t2.done) {
-        return orderDate(t1, t2);
+export function order<T>(t1: T, t2: T, accessors: ((obj: T) => any)[]) {
+    for (let accessor of accessors) {
+        const v1 = accessor(t1);
+        const v2 = accessor(t2);
+        if (v1 !== v2) {
+            return v1 > v2 ? 1 : -1;
+        }
     }
-    return t1.done ? 1 : -1;
+    return 0;
 }
 
 /**

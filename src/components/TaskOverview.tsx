@@ -16,7 +16,7 @@ import { TaskListItem } from './TaskListItem';
 import AddIcon from '@material-ui/icons/Add';
 import { fade } from '@material-ui/core/styles';
 import { useHistory } from 'react-router';
-import { order } from '../util/order';
+import { order, maxDate } from '../util/order';
 import { IDispatchReceiver } from '../util/dispatcher';
 import { applyFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
@@ -107,7 +107,13 @@ export function TaskOverview(props: IDispatchReceiver) {
                             state.selectedProjects,
                             state.selectedTags
                         )
-                            .sort(order)
+                            .sort((t1, t2) =>
+                                order(t1, t2, [
+                                    t => !!t.done,
+                                    t => (t.due || maxDate).getTime(),
+                                    t => t.priority || 'Z'
+                                ])
+                            )
                             .map(task => (
                                 <TaskListItem
                                     key={task.id.toString()}
