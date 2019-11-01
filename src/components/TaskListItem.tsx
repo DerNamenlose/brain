@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task, TaskPrio } from '../model/Task';
 import React, { Fragment } from 'react';
 import {
     ListItem,
@@ -11,6 +11,14 @@ import LandscapeIcon from '@material-ui/icons/Landscape';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import EventIcon from '@material-ui/icons/Event';
+import {
+    red,
+    orange,
+    yellow,
+    green,
+    lightBlue,
+    grey
+} from '@material-ui/core/colors';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -30,6 +38,40 @@ const useStyles = makeStyles(theme =>
         },
         overdue: {
             color: theme.palette.error.main
+        },
+        priority: {
+            borderRadius: '50%',
+            width: '1em',
+            height: '1em',
+            display: 'inline-block',
+            textAlign: 'center',
+            paddingBottom: theme.spacing(0.5),
+            paddingLeft: theme.spacing(0.25),
+            paddingRight: theme.spacing(0.25)
+        },
+        prioA: {
+            backgroundColor: red[500],
+            color: theme.palette.getContrastText(red[500])
+        },
+        prioB: {
+            backgroundColor: orange[500],
+            color: theme.palette.getContrastText(orange[500])
+        },
+        prioC: {
+            backgroundColor: yellow[500],
+            color: theme.palette.getContrastText(yellow[500])
+        },
+        prioD: {
+            backgroundColor: green[500],
+            color: theme.palette.getContrastText(green[500])
+        },
+        prioE: {
+            backgroundColor: lightBlue[200],
+            color: theme.palette.getContrastText(lightBlue[200])
+        },
+        prioF: {
+            backgroundColor: grey[500],
+            color: theme.palette.getContrastText(grey[500])
         }
     })
 );
@@ -54,10 +96,39 @@ function DueClass(task: Task): string {
     return classes.overdue;
 }
 
+function PrioDisplay(props: { prio: TaskPrio }) {
+    const classes = useStyles();
+    let prioClass = undefined;
+    switch (props.prio) {
+        case 'A':
+            prioClass = classes.prioA;
+            break;
+        case 'B':
+            prioClass = classes.prioB;
+            break;
+        case 'C':
+            prioClass = classes.prioC;
+            break;
+        case 'D':
+            prioClass = classes.prioD;
+            break;
+        case 'E':
+            prioClass = classes.prioE;
+            break;
+        case 'F':
+            prioClass = classes.prioF;
+            break;
+    }
+    return (
+        <span className={`${classes.priority} ${prioClass}`}>{props.prio}</span>
+    );
+}
+
 function MetaDisplay(props: { task: Task }) {
     const classes = useStyles();
     return (
         <Fragment>
+            {props.task.priority && <PrioDisplay prio={props.task.priority} />}
             {props.task.contexts && props.task.contexts.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LandscapeIcon fontSize='inherit' />

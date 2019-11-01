@@ -11,7 +11,9 @@ import {
     createStyles,
     withStyles,
     FormHelperText,
-    Paper
+    Paper,
+    Select,
+    MenuItem
 } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import SaveIcon from '@material-ui/icons/Save';
@@ -189,6 +191,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                         <FormControl>
                             Due:
                             <input
+                                id='due'
                                 type='date'
                                 value={
                                     (editedTask.due &&
@@ -206,6 +209,31 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                     setEditedTask(nv);
                                 }}
                             />
+                        </FormControl>
+                        <FormControl>
+                            <InputLabel htmlFor='priority'>Priority</InputLabel>
+                            <Select
+                                id='priority'
+                                value={editedTask.priority || ' '}
+                                onChange={ev =>
+                                    setEditedTask(
+                                        copyAndUpdate(
+                                            editedTask,
+                                            'priority',
+                                            ev.target.value === ' '
+                                                ? undefined
+                                                : ev.target.value
+                                        )
+                                    )
+                                }>
+                                <MenuItem value={' '}>[None]</MenuItem>
+                                <MenuItem value={'A'}>A</MenuItem>
+                                <MenuItem value={'B'}>B</MenuItem>
+                                <MenuItem value={'C'}>C</MenuItem>
+                                <MenuItem value={'D'}>D</MenuItem>
+                                <MenuItem value={'E'}>E</MenuItem>
+                                <MenuItem value={'F'}>F</MenuItem>
+                            </Select>
                         </FormControl>
                         <ButtonGroup className={classes.buttons}>
                             <ResponsiveButton
