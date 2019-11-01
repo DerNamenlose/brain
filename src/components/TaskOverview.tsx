@@ -111,7 +111,8 @@ export function TaskOverview(props: IDispatchReceiver) {
                                 order(t1, t2, [
                                     t => !!t.done,
                                     t => (t.due || maxDate).getTime(),
-                                    t => t.priority || 'Z'
+                                    t => t.priority || 'Z',
+                                    t => t.title
                                 ])
                             )
                             .map(task => (
