@@ -10,10 +10,12 @@ import {
 import InboxIcon from '@material-ui/icons/Inbox';
 import ListIcon from '@material-ui/icons/List';
 import AddIcon from '@material-ui/icons/Add';
+import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import React, { Fragment, useState } from 'react';
 import { makeStyles, createStyles } from '@material-ui/styles';
 import { TaskOverview } from './TaskOverview';
 import { Inbox } from './Inbox';
+import { SomedayMaybe } from './SomedayMaybe';
 import { useHistory } from 'react-router';
 
 interface TabPanelProps {
@@ -74,6 +76,11 @@ export function MainView(props: IDispatchReceiver) {
                     label={smallScreen ? undefined : 'Inbox'}
                     aria-label='Inbox'
                 />
+                <Tab
+                    icon={<AllInclusiveIcon />}
+                    label={smallScreen ? undefined : 'Someday/Maybe'}
+                    aria-label='Inbox'
+                />
             </Tabs>
             {/* <SwipeableViews
                 axis='x'
@@ -90,6 +97,9 @@ export function MainView(props: IDispatchReceiver) {
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Inbox dispatch={props.dispatch} />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+                <SomedayMaybe dispatch={props.dispatch} />
             </TabPanel>
             <Fab
                 color='secondary'

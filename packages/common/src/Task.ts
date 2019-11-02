@@ -12,4 +12,5 @@ export interface Task {
     contexts?: string[];
     projects?: string[];
     tags?: string[];
+    postponed?: boolean; // if an item is postponed, it's visible in the Someday/Maybe list
 }

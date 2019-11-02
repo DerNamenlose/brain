@@ -20,6 +20,7 @@ export function overviewFilter(
 ): Task[] {
     return tasks.filter(
         task =>
+            !task.postponed && // postponed tasks are by definition not visible
             !!task.contexts && // only tasks that have a context are in the overview.
             task.contexts.length > 0 && // Tasks without any contexts are in the inbox by definition
             matches(selectedContexts, task.contexts) &&
@@ -29,5 +30,12 @@ export function overviewFilter(
 }
 
 export function inboxFilter(tasks: Task[]): Task[] {
-    return tasks.filter(task => !task.contexts || task.contexts.length === 0); // The inbox contains (by definition) tasks not yet assigned to any context
+    return tasks.filter(
+        task =>
+            !task.postponed && (!task.contexts || task.contexts.length === 0)
+    ); // The inbox contains (by definition) tasks not yet assigned to any context
+}
+
+export function somedayMaybeFilter(tasks: Task[]): Task[] {
+    return tasks.filter(task => !!task.postponed); // Someday/Maybe is a specific flag on the task
 }

@@ -13,11 +13,16 @@ import {
     FormHelperText,
     Paper,
     Select,
-    MenuItem
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    Typography
 } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
+import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
+import PlayIcon from '@material-ui/icons/PlayArrow';
 import { ResponsiveButton } from './ResponsiveButton';
 import { useHistory } from 'react-router-dom';
 import ReactSelectMaterialUi from 'react-select-material-ui';
@@ -43,6 +48,25 @@ const useStyles = makeStyles(theme =>
     })
 );
 
+function ActivationDialog(props: {
+    open: boolean;
+    onClose: (answer: boolean) => void;
+}) {
+    return (
+        <Dialog open={props.open} aria-labelledby='dialog-title'>
+            <DialogTitle id='dialog-title'>Activate task?</DialogTitle>
+            <Typography>
+                This task is currently postponed and will only be visible in
+                Someday/Maybe. Activate it?
+            </Typography>
+            <Button onClick={() => props.onClose(true)}>Activate</Button>
+            <Button onClick={() => props.onClose(false)}>
+                Leave postponed
+            </Button>
+        </Dialog>
+    );
+}
+
 export interface TaskEditorProps {
     task: Task;
     isNew?: boolean;
@@ -63,11 +87,32 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
     const [validation, setValidation] = useState<ValidationResult>(
         new ValidationResult()
     );
+    const [activationRequest, setActivationRequest] = useState(false);
 
     const handleChange = (name: keyof Task) => {
         return (ev: React.ChangeEvent<HTMLInputElement>) => {
             setEditedTask(copyAndUpdate(editedTask, name, ev.target.value));
         };
+    };
+
+    const handleSave = () => {
+        const res = validate(editedTask);
+        if (res.hasAnyError()) {
+            setValidation(res);
+        } else {
+            if (!!editedTask.postponed) {
+                // ask the user, whether the edit should activate the task, as to not have
+                // edits basically invisible because they are in Someday/Maybe
+                setActivationRequest(true);
+            } else {
+                props.dispatch({
+                    type: 'task',
+                    subtype: props.isNew ? 'create' : 'update',
+                    task: editedTask
+                } as ITaskAction);
+                history.goBack();
+            }
+        }
     };
 
     const StateButton = withStyles(theme => ({
@@ -242,11 +287,34 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                 color='primary'
                                 variant='contained'
                                 aria-label='Save'
+                                onClick={handleSave}
+                            />
+                            <ResponsiveButton
+                                icon={
+                                    !!editedTask.postponed ? (
+                                        <PlayIcon />
+                                    ) : (
+                                        <AllInclusiveIcon />
+                                    )
+                                }
+                                extended={
+                                    !!editedTask.postponed
+                                        ? 'Activate'
+                                        : 'Postpone'
+                                }
+                                color='primary'
+                                variant='contained'
+                                aria-label={
+                                    !!editedTask.postponed
+                                        ? 'Activate'
+                                        : 'Postpone'
+                                }
                                 onClick={() => {
                                     const res = validate(editedTask);
                                     if (res.hasAnyError()) {
                                         setValidation(res);
                                     } else {
+                                        editedTask.postponed = !editedTask.postponed;
                                         props.dispatch({
                                             type: 'task',
                                             subtype: props.isNew
@@ -268,6 +336,18 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                             />
                         </ButtonGroup>
                     </FormControl>
+                    <ActivationDialog
+                        open={activationRequest}
+                        onClose={activate => {
+                            if (activate) {
+                                editedTask.postponed = false;
+                                handleSave();
+                            } else {
+                                history.goBack();
+                            }
+                            setActivationRequest(false);
+                        }}
+                    />
                 </Fragment>
             )}
         </GlobalState.Consumer>
