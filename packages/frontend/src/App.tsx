@@ -13,6 +13,9 @@ import { IDispatchReceiver, reducer } from './util/dispatcher';
 import { IGlobalState, GlobalState } from './model/GlobalState';
 import { LocalStorage } from './storage/LocalStorage';
 import { MainView } from './components/MainView';
+import { createMuiTheme } from '@material-ui/core';
+import { green, red } from '@material-ui/core/colors';
+import { ThemeProvider } from '@material-ui/styles';
 
 function FindTask(props: IDispatchReceiver) {
     const { id } = useParams();
@@ -26,6 +29,13 @@ function FindTask(props: IDispatchReceiver) {
 }
 
 const storage = new LocalStorage();
+
+const theme = createMuiTheme({
+    palette: {
+        primary: green,
+        secondary: red
+    }
+});
 
 const App: React.FC = () => {
     const [state, dispatch] = useReducer(reducer.bind(null, storage), {
@@ -49,24 +59,26 @@ const App: React.FC = () => {
     return (
         <Router>
             <GlobalState.Provider value={state}>
-                <div className='App'>
-                    <Switch>
-                        <Route exact path='/'>
-                            {/* <TaskOverview dispatch={dispatch} /> */}
-                            <MainView dispatch={dispatch} />
-                        </Route>
-                        <Route path='/task/:id'>
-                            <FindTask dispatch={dispatch} />
-                        </Route>
-                        <Route path='/newTask'>
-                            <TaskEditor
-                                task={{ id: Guid.create(), title: '' }}
-                                isNew
-                                dispatch={dispatch}
-                            />
-                        </Route>
-                    </Switch>
-                </div>
+                <ThemeProvider theme={theme}>
+                    <div className='App'>
+                        <Switch>
+                            <Route exact path='/'>
+                                {/* <TaskOverview dispatch={dispatch} /> */}
+                                <MainView dispatch={dispatch} />
+                            </Route>
+                            <Route path='/task/:id'>
+                                <FindTask dispatch={dispatch} />
+                            </Route>
+                            <Route path='/newTask'>
+                                <TaskEditor
+                                    task={{ id: Guid.create(), title: '' }}
+                                    isNew
+                                    dispatch={dispatch}
+                                />
+                            </Route>
+                        </Switch>
+                    </div>
+                </ThemeProvider>
             </GlobalState.Provider>
         </Router>
     );

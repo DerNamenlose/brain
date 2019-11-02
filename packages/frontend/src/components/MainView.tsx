@@ -3,18 +3,15 @@ import {
     Tab,
     Tabs,
     Typography,
-    Box,
     Fab,
     Theme,
-    Hidden,
     useMediaQuery
 } from '@material-ui/core';
 import InboxIcon from '@material-ui/icons/Inbox';
 import ListIcon from '@material-ui/icons/List';
-import SwipeableViews from 'react-swipeable-views';
 import AddIcon from '@material-ui/icons/Add';
 import React, { Fragment, useState } from 'react';
-import { useTheme, makeStyles, createStyles } from '@material-ui/styles';
+import { makeStyles, createStyles } from '@material-ui/styles';
 import { TaskOverview } from './TaskOverview';
 import { Inbox } from './Inbox';
 import { useHistory } from 'react-router';
@@ -37,7 +34,7 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
     createStyles({
         addButton: {
             position: 'absolute',
@@ -55,11 +52,9 @@ export function MainView(props: IDispatchReceiver) {
     const history = useHistory();
     const classes = useStyles();
     const [value, setValue] = useState(0);
-    const smallScreen = useMediaQuery(
-        /*(theme: Theme) =>   theme.breakpoints.down('xs') */
-        '(max-width: 600px)'
+    const smallScreen = useMediaQuery((theme: Theme) =>
+        theme.breakpoints.down('xs')
     );
-    console.log(smallScreen);
     return (
         <Fragment>
             <Tabs
