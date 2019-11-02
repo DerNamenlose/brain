@@ -6,13 +6,13 @@ import {
     useParams
 } from 'react-router-dom';
 import './App.css';
-import { Task } from './model/Task';
+import { Task } from 'brain-common';
 import { Guid } from 'guid-typescript';
-import { TaskOverview } from './components/TaskOverview';
 import { TaskEditor } from './components/TaskEditor';
 import { IDispatchReceiver, reducer } from './util/dispatcher';
 import { IGlobalState, GlobalState } from './model/GlobalState';
 import { LocalStorage } from './storage/LocalStorage';
+import { MainView } from './components/MainView';
 
 function FindTask(props: IDispatchReceiver) {
     const { id } = useParams();
@@ -52,7 +52,8 @@ const App: React.FC = () => {
                 <div className='App'>
                     <Switch>
                         <Route exact path='/'>
-                            <TaskOverview dispatch={dispatch} />
+                            {/* <TaskOverview dispatch={dispatch} /> */}
+                            <MainView dispatch={dispatch} />
                         </Route>
                         <Route path='/task/:id'>
                             <FindTask dispatch={dispatch} />

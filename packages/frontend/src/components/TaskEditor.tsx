@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task } from 'brain-common';
 import { Fragment, useState } from 'react';
 import React from 'react';
 import {

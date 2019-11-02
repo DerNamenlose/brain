@@ -1,4 +1,4 @@
-import { Task, TaskPrio } from '../model/Task';
+import { Task, TaskPrio } from 'brain-common';
 import React, { Fragment } from 'react';
 import {
     ListItem,

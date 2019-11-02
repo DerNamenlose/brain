@@ -1,0 +1,13 @@
+{
+  "name": "brain-common",
+  "version": "0.1.0",
+  "description": "brain - Simply GTD® common files",
+  "main": "src/index.ts",
+  "repository": "https://repositories.geekbetrieb.de/namenlos/brain.git",
+  "author": "Markus Brueckner",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "guid-typescript": "^1.0.9"
+  }
+}

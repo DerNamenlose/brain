@@ -1,8 +1,10 @@
 import { IConfig } from 'config';
 import * as express from 'express';
+import { Task } from 'brain-common';
+import { Guid } from 'guid-typescript';
 
 export class Routes {
-    private _tasks = [] as any[];
+    private _tasks = [] as Task[];
     private _config: IConfig;
 
     public constructor(config: IConfig, app: express.Application) {
@@ -34,7 +36,7 @@ export class Routes {
 
     private saveTask(req: express.Request, res: express.Response) {
         const taskIndex = this._tasks.findIndex(
-            task => req.params['id'] === task.id
+            task => Guid.parse(req.params['id']) === task.id
         );
         const storedObject = { ...req.body, id: req.params['id'] };
         if (taskIndex === -1) {

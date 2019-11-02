@@ -1,4 +1,4 @@
-import { Task } from './Task';
+import { Task } from 'brain-common';
 import React from 'react';
 
 export interface IGlobalState {

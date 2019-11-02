@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task } from 'brain-common';
 import { openDB } from 'idb';
 import { Guid } from 'guid-typescript';
 

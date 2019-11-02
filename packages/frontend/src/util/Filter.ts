@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task } from 'brain-common';
 
 function matches(filterProperties: string[], taskProperties?: string[]) {
     return (
@@ -12,7 +12,7 @@ function matches(filterProperties: string[], taskProperties?: string[]) {
     );
 }
 
-export function applyFilter(
+export function overviewFilter(
     tasks: Task[],
     selectedContexts: string[],
     selectedProjects: string[],
@@ -20,8 +20,14 @@ export function applyFilter(
 ): Task[] {
     return tasks.filter(
         task =>
+            !!task.contexts && // only tasks that have a context are in the overview.
+            task.contexts.length > 0 && // Tasks without any contexts are in the inbox by definition
             matches(selectedContexts, task.contexts) &&
             matches(selectedProjects, task.projects) &&
             matches(selectedTags, task.tags)
     );
+}
+
+export function inboxFilter(tasks: Task[]): Task[] {
+    return tasks.filter(task => !task.contexts || task.contexts.length === 0); // The inbox contains (by definition) tasks not yet assigned to any context
 }

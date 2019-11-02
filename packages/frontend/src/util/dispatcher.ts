@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task } from 'brain-common';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';

@@ -3,7 +3,6 @@ import React from 'react';
 import {
     AppBar,
     Toolbar,
-    Fab,
     List,
     makeStyles,
     createStyles,
@@ -12,14 +11,11 @@ import {
 import { ContextsButton } from './ContextsButton';
 import { ProjectsButton } from './ProjectsButton';
 import { TagsButton } from './TagsButton';
-import { TaskListItem } from './TaskListItem';
-import AddIcon from '@material-ui/icons/Add';
 import { fade } from '@material-ui/core/styles';
-import { useHistory } from 'react-router';
-import { order, maxDate } from '../util/order';
 import { IDispatchReceiver } from '../util/dispatcher';
-import { applyFilter } from '../util/Filter';
+import { overviewFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
+import { TaskList } from './TaskList';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -64,15 +60,6 @@ const useStyles = makeStyles((theme: Theme) =>
                 }
             }
         },
-        addButton: {
-            position: 'absolute',
-            zIndex: 1,
-            top: -70,
-            left: 0,
-            right: 0,
-            marginLeft: 'auto',
-            marginRight: 10
-        },
         task: {
             margin: 2
         }
@@ -80,7 +67,6 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export function TaskOverview(props: IDispatchReceiver) {
-    const history = useHistory();
     const classes = useStyles();
     return (
         <GlobalState.Consumer>
@@ -92,36 +78,15 @@ export function TaskOverview(props: IDispatchReceiver) {
                             <ProjectsButton dispatch={props.dispatch} />
                             <TagsButton dispatch={props.dispatch} />
                         </Toolbar>
-                        <Fab
-                            color='secondary'
-                            aria-label='add'
-                            className={classes.addButton}
-                            onClick={() => history.push('/newTask')}>
-                            <AddIcon />
-                        </Fab>
                     </AppBar>
-                    <List>
-                        {applyFilter(
+                    <TaskList
+                        tasks={overviewFilter(
                             state.tasks,
                             state.selectedContexts,
                             state.selectedProjects,
                             state.selectedTags
-                        )
-                            .sort((t1, t2) =>
-                                order(t1, t2, [
-                                    t => !!t.done,
-                                    t => (t.due || maxDate).getTime(),
-                                    t => t.priority || 'Z',
-                                    t => t.title
-                                ])
-                            )
-                            .map(task => (
-                                <TaskListItem
-                                    key={task.id.toString()}
-                                    task={task}
-                                />
-                            ))}
-                    </List>
+                        )}
+                    />
                 </Fragment>
             )}
         </GlobalState.Consumer>

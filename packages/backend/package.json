@@ -12,8 +12,11 @@
     "author": "Markus Brueckner",
     "private": true,
     "dependencies": {
+        "brain-common": "^0.1.0",
         "config": "^3.2.4",
-        "express": "^4.17.1"
+        "express": "^4.17.1",
+        "guid-typescript": "^1.0.9",
+        "nano": "^8.1.0"
     },
     "devDependencies": {
         "ts-node-dev": "^1.0.0-pre.43",
