@@ -36,16 +36,39 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         addButton: {
-            position: 'absolute',
+            position: 'fixed',
             zIndex: 1,
             bottom: 75,
             left: 0,
             right: 0,
             marginLeft: 'auto',
             marginRight: 10
+        },
+        tabs: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            zIndex: 1
+        },
+        tabPanel: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            right: 0,
+            overflowY: 'auto'
+        },
+        smallBorder: {
+            marginTop: theme.spacing(6),
+            marginBottom: theme.spacing(6)
+        },
+        normalBorder: {
+            marginTop: theme.spacing(9),
+            marginBottom: theme.spacing(8)
         }
     })
 );
@@ -65,7 +88,8 @@ export function MainView(props: IDispatchReceiver) {
                     setValue(newValue);
                 }}
                 indicatorColor='primary'
-                value={value}>
+                value={value}
+                className={classes.tabs}>
                 <Tab
                     icon={<ListIcon />}
                     label={smallScreen ? undefined : 'Tasks'}
@@ -92,15 +116,20 @@ export function MainView(props: IDispatchReceiver) {
                     top: 'auto',
                     bottom: 0
                 }}> */}
-            <TabPanel value={value} index={0}>
-                <TaskOverview dispatch={props.dispatch} />
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-                <Inbox dispatch={props.dispatch} />
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-                <SomedayMaybe dispatch={props.dispatch} />
-            </TabPanel>
+            <div
+                className={`${classes.tabPanel} ${
+                    smallScreen ? classes.smallBorder : classes.normalBorder
+                }`}>
+                <TabPanel value={value} index={0}>
+                    <TaskOverview dispatch={props.dispatch} />
+                </TabPanel>
+                <TabPanel value={value} index={1}>
+                    <Inbox dispatch={props.dispatch} />
+                </TabPanel>
+                <TabPanel value={value} index={2}>
+                    <SomedayMaybe dispatch={props.dispatch} />
+                </TabPanel>
+            </div>
             <Fab
                 color='secondary'
                 aria-label='add'
