@@ -8,6 +8,7 @@ export interface Task {
     description?: string;
     priority?: TaskPrio;
     due?: Date;
+    created?: Date;
     done?: boolean;
     contexts?: string[];
     projects?: string[];

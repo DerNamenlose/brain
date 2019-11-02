@@ -11,6 +11,7 @@ import LandscapeIcon from '@material-ui/icons/Landscape';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import EventIcon from '@material-ui/icons/Event';
+import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import {
     red,
     orange,
@@ -19,6 +20,7 @@ import {
     lightBlue,
     grey
 } from '@material-ui/core/colors';
+import { formatDistance } from 'date-fns';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -124,6 +126,18 @@ function PrioDisplay(props: { prio: TaskPrio }) {
     );
 }
 
+function AgeDisplay(props: { created: Date }) {
+    const classes = useStyles();
+    return (
+        <span className={classes.metaEntry}>
+            <SaveAltIcon fontSize='inherit' />
+            <span className={classes.metaText}>
+                {formatDistance(props.created, new Date())} ago
+            </span>
+        </span>
+    );
+}
+
 function MetaDisplay(props: { task: Task }) {
     const classes = useStyles();
     return (
@@ -160,6 +174,7 @@ function MetaDisplay(props: { task: Task }) {
                     </span>
                 </span>
             )}
+            {props.task.created && <AgeDisplay created={props.task.created} />}
         </Fragment>
     );
 }
