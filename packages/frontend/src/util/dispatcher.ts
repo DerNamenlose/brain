@@ -2,6 +2,7 @@ import { Task } from 'brain-common';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
+import { inboxFilter, somedayMaybeFilter } from './Filter';
 
 export interface ITaskAction {
     type: 'task';
@@ -99,6 +100,9 @@ function handleTaskAction(
     newState.contexts = extractContexts(newState.tasks);
     newState.projects = extractProjects(newState.tasks);
     newState.tags = extractTags(newState.tasks);
+    newState.inboxEmpty = inboxFilter(newState.tasks).length === 0;
+    newState.somedayMaybeEmpty =
+        somedayMaybeFilter(newState.tasks).length === 0;
     return newState;
 }
 

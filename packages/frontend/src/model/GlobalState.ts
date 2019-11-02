@@ -9,6 +9,8 @@ export interface IGlobalState {
     selectedContexts: string[];
     selectedProjects: string[];
     selectedTags: string[];
+    inboxEmpty: boolean;
+    somedayMaybeEmpty: boolean;
 }
 
 export const GlobalState = React.createContext({} as IGlobalState);

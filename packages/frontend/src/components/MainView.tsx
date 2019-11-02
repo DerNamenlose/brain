@@ -17,6 +17,7 @@ import { TaskOverview } from './TaskOverview';
 import { Inbox } from './Inbox';
 import { SomedayMaybe } from './SomedayMaybe';
 import { useHistory } from 'react-router';
+import { GlobalState } from '../model/GlobalState';
 
 interface TabPanelProps {
     value: number;
@@ -81,32 +82,36 @@ export function MainView(props: IDispatchReceiver) {
         theme.breakpoints.down('xs')
     );
     return (
-        <Fragment>
-            <Tabs
-                variant='fullWidth'
-                onChange={(ev, newValue) => {
-                    setValue(newValue);
-                }}
-                indicatorColor='primary'
-                value={value}
-                className={classes.tabs}>
-                <Tab
-                    icon={<ListIcon />}
-                    label={smallScreen ? undefined : 'Tasks'}
-                    aria-label='Tasks'
-                />
-                <Tab
-                    icon={<InboxIcon />}
-                    label={smallScreen ? undefined : 'Inbox'}
-                    aria-label='Inbox'
-                />
-                <Tab
-                    icon={<AllInclusiveIcon />}
-                    label={smallScreen ? undefined : 'Someday/Maybe'}
-                    aria-label='Inbox'
-                />
-            </Tabs>
-            {/* <SwipeableViews
+        <GlobalState.Consumer>
+            {state => (
+                <Fragment>
+                    <Tabs
+                        variant='fullWidth'
+                        onChange={(ev, newValue) => {
+                            setValue(newValue);
+                        }}
+                        indicatorColor='primary'
+                        value={value}
+                        className={classes.tabs}>
+                        <Tab
+                            icon={<ListIcon />}
+                            label={smallScreen ? undefined : 'Tasks'}
+                            aria-label='Tasks'
+                        />
+                        <Tab
+                            icon={<InboxIcon />}
+                            label={smallScreen ? undefined : 'Inbox'}
+                            aria-label='Inbox'
+                            disabled={state.inboxEmpty}
+                        />
+                        <Tab
+                            icon={<AllInclusiveIcon />}
+                            label={smallScreen ? undefined : 'Someday/Maybe'}
+                            aria-label='Inbox'
+                            disabled={state.somedayMaybeEmpty}
+                        />
+                    </Tabs>
+                    {/* <SwipeableViews
                 axis='x'
                 index={value}
                 onChangeIndex={newValue => {
@@ -116,28 +121,32 @@ export function MainView(props: IDispatchReceiver) {
                     top: 'auto',
                     bottom: 0
                 }}> */}
-            <div
-                className={`${classes.tabPanel} ${
-                    smallScreen ? classes.smallBorder : classes.normalBorder
-                }`}>
-                <TabPanel value={value} index={0}>
-                    <TaskOverview dispatch={props.dispatch} />
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    <Inbox dispatch={props.dispatch} />
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                    <SomedayMaybe dispatch={props.dispatch} />
-                </TabPanel>
-            </div>
-            <Fab
-                color='secondary'
-                aria-label='add'
-                className={classes.addButton}
-                onClick={() => history.push('/newTask')}>
-                <AddIcon />
-            </Fab>
-            {/* </SwipeableViews> */}
-        </Fragment>
+                    <div
+                        className={`${classes.tabPanel} ${
+                            smallScreen
+                                ? classes.smallBorder
+                                : classes.normalBorder
+                        }`}>
+                        <TabPanel value={value} index={0}>
+                            <TaskOverview dispatch={props.dispatch} />
+                        </TabPanel>
+                        <TabPanel value={value} index={1}>
+                            <Inbox dispatch={props.dispatch} />
+                        </TabPanel>
+                        <TabPanel value={value} index={2}>
+                            <SomedayMaybe dispatch={props.dispatch} />
+                        </TabPanel>
+                    </div>
+                    <Fab
+                        color='secondary'
+                        aria-label='add'
+                        className={classes.addButton}
+                        onClick={() => history.push('/newTask')}>
+                        <AddIcon />
+                    </Fab>
+                    {/* </SwipeableViews> */}
+                </Fragment>
+            )}
+        </GlobalState.Consumer>
     );
 }
