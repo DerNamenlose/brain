@@ -10,6 +10,17 @@ export interface ITaskAction {
     task: Task;
 }
 
+export function taskAction(
+    task: Task,
+    action: 'create' | 'update' | 'delete' | 'load'
+): ITaskAction {
+    return {
+        type: 'task',
+        subtype: action,
+        task: task
+    };
+}
+
 export interface IFilterAction {
     type: 'context' | 'project' | 'tag';
     subtype: 'select' | 'deselect';

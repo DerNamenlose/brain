@@ -191,10 +191,6 @@ export function TaskListItem(props: TaskListItemProps) {
         <ListItem button onClick={() => history.push(`/task/${props.task.id}`)}>
             <ListItemText
                 primary={props.task.title}
-                // secondary={
-                //     props.task.due &&
-                //     `Due: ${props.task.due.toLocaleDateString()}`
-                // }
                 secondary={<MetaDisplay task={props.task} />}
                 className={(props.task.done && classes.done) || undefined}
             />
