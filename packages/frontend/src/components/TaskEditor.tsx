@@ -18,11 +18,12 @@ import {
     DialogTitle,
     Typography
 } from '@material-ui/core';
-import { green } from '@material-ui/core/colors';
+import { green, orange, yellow } from '@material-ui/core/colors';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import PlayIcon from '@material-ui/icons/PlayArrow';
+import SkipNextIcon from '@material-ui/icons/SkipNext';
 import { ResponsiveButton } from './ResponsiveButton';
 import { useHistory } from 'react-router-dom';
 import ReactSelectMaterialUi from 'react-select-material-ui';
@@ -48,6 +49,18 @@ const useStyles = makeStyles(theme =>
     })
 );
 
+const SkipButton = withStyles({
+    root: {
+        backgroundColor: orange[500]
+    }
+})(ResponsiveButton);
+
+const PostponeButton = withStyles({
+    root: {
+        backgroundColor: yellow[500]
+    }
+})(ResponsiveButton);
+
 function ActivationDialog(props: {
     open: boolean;
     onClose: (answer: boolean) => void;
@@ -70,6 +83,18 @@ function ActivationDialog(props: {
 export interface TaskEditorProps {
     task: Task;
     isNew?: boolean;
+    onClose?: (abort: boolean) => void;
+    canSkip?: boolean; // does the editor have skip button (i.e. it's running in the context of the inbox processing assistent)
+}
+
+export interface TaskEditorControlProps {
+    task: Task;
+    isNew?: boolean;
+    onSave?: (newState: Task) => void;
+    onPostpone?: (newState: Task) => void;
+    onCancel?: () => void;
+    onSkip?: () => void;
+    canSkip?: boolean; // does the editor have skip button (i.e. it's running in the context of the inbox processing assistent)
 }
 
 function validate(task: Task): ValidationResult {
@@ -80,52 +105,43 @@ function validate(task: Task): ValidationResult {
     return result;
 }
 
-export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
+function StateButton(props: { task: Task; onClick: () => void }) {
+    const StyledButton = withStyles(theme => ({
+        root: {
+            backgroundColor: props.task.done
+                ? theme.palette.grey[500]
+                : green[500],
+            '& .stateText': {
+                textDecoration: props.task.done ? 'line-through' : 'none'
+            },
+            margin: theme.spacing(1)
+        }
+    }))(Button);
+    return (
+        <StyledButton
+            variant='contained'
+            color='primary'
+            onClick={props.onClick}>
+            <span className='stateText'>
+                Task is {props.task.done ? 'done. ' : 'open. '}
+            </span>
+            <span>{props.task.done ? 'Reopen?' : 'Finish?'}</span>
+        </StyledButton>
+    );
+}
+
+export function TaskEditorControl(props: TaskEditorControlProps) {
     const classes = useStyles();
-    const history = useHistory();
     const [editedTask, setEditedTask] = useState({ ...props.task });
     const [validation, setValidation] = useState<ValidationResult>(
         new ValidationResult()
     );
     const [activationRequest, setActivationRequest] = useState(false);
-
     const handleChange = (name: keyof Task) => {
         return (ev: React.ChangeEvent<HTMLInputElement>) => {
             setEditedTask(copyAndUpdate(editedTask, name, ev.target.value));
         };
     };
-
-    const handleSave = () => {
-        const res = validate(editedTask);
-        if (res.hasAnyError()) {
-            setValidation(res);
-        } else {
-            if (!!editedTask.postponed) {
-                // ask the user, whether the edit should activate the task, as to not have
-                // edits basically invisible because they are in Someday/Maybe
-                setActivationRequest(true);
-            } else {
-                props.dispatch({
-                    type: 'task',
-                    subtype: props.isNew ? 'create' : 'update',
-                    task: editedTask
-                } as ITaskAction);
-                history.goBack();
-            }
-        }
-    };
-
-    const StateButton = withStyles(theme => ({
-        root: {
-            backgroundColor: editedTask.done
-                ? theme.palette.grey[500]
-                : green[500],
-            '& .stateText': {
-                textDecoration: editedTask.done ? 'line-through' : 'none'
-            },
-            margin: theme.spacing(1)
-        }
-    }))(Button);
 
     return (
         <GlobalState.Consumer>
@@ -155,21 +171,14 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                             )}
                         </FormControl>
                         <StateButton
-                            variant='contained'
-                            color='primary'
+                            task={editedTask}
                             onClick={() =>
                                 setEditedTask({
                                     ...editedTask,
                                     done: !editedTask.done
                                 })
-                            }>
-                            <span className='stateText'>
-                                Task is {editedTask.done ? 'done. ' : 'open. '}
-                            </span>
-                            <span>
-                                {editedTask.done ? 'Reopen?' : 'Finish?'}
-                            </span>
-                        </StateButton>
+                            }
+                        />
                         <FormControl>
                             <InputLabel htmlFor='Description'>
                                 Description
@@ -287,9 +296,17 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                 color='primary'
                                 variant='contained'
                                 aria-label='Save'
-                                onClick={handleSave}
+                                onClick={() => {
+                                    const res = validate(editedTask);
+                                    if (res.hasAnyError()) {
+                                        setValidation(res);
+                                    } else {
+                                        props.onSave &&
+                                            props.onSave(editedTask);
+                                    }
+                                }}
                             />
-                            <ResponsiveButton
+                            <PostponeButton
                                 icon={
                                     !!editedTask.postponed ? (
                                         <PlayIcon />
@@ -314,16 +331,24 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                     if (res.hasAnyError()) {
                                         setValidation(res);
                                     } else {
-                                        editedTask.postponed = !editedTask.postponed;
-                                        props.dispatch({
-                                            type: 'task',
-                                            subtype: props.isNew
-                                                ? 'create'
-                                                : 'update',
-                                            task: editedTask
-                                        } as ITaskAction);
-                                        history.goBack();
+                                        props.onPostpone &&
+                                            props.onPostpone(editedTask);
                                     }
+                                }}
+                            />
+                            <SkipButton
+                                icon={<SkipNextIcon />}
+                                extended='Skip task'
+                                color='primary'
+                                variant='contained'
+                                aria-label='Skip task'
+                                onClick={() => {
+                                    props.onSkip && props.onSkip();
+                                }}
+                                style={{
+                                    display: props.canSkip
+                                        ? 'inline-block'
+                                        : 'none'
                                 }}
                             />
                             <ResponsiveButton
@@ -332,7 +357,9 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                                 color='secondary'
                                 variant='contained'
                                 aria-label='Cancel'
-                                onClick={() => history.goBack()}
+                                onClick={() =>
+                                    props.onCancel && props.onCancel()
+                                }
                             />
                         </ButtonGroup>
                     </FormControl>
@@ -341,15 +368,46 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
                         onClose={activate => {
                             if (activate) {
                                 editedTask.postponed = false;
-                                handleSave();
-                            } else {
-                                history.goBack();
                             }
+                            props.onSave && props.onSave(editedTask);
                             setActivationRequest(false);
                         }}
                     />
                 </Fragment>
             )}
         </GlobalState.Consumer>
+    );
+}
+
+export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
+    const history = useHistory();
+
+    const handlePostpone = (newState: Task) => {
+        newState.postponed = !newState.postponed;
+        props.dispatch({
+            type: 'task',
+            subtype: props.isNew ? 'create' : 'update',
+            task: newState
+        } as ITaskAction);
+        history.goBack();
+    };
+
+    const handleSave = (newState: Task) => {
+        props.dispatch({
+            type: 'task',
+            subtype: props.isNew ? 'create' : 'update',
+            task: newState
+        } as ITaskAction);
+        history.goBack();
+    };
+
+    return (
+        <TaskEditorControl
+            task={props.task}
+            isNew={props.isNew}
+            onSave={handleSave}
+            onCancel={() => history.goBack()}
+            onPostpone={handlePostpone}
+        />
     );
 }
