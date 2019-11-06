@@ -63,7 +63,6 @@ const App: React.FC = () => {
                     <div className='App'>
                         <Switch>
                             <Route exact path='/'>
-                                {/* <TaskOverview dispatch={dispatch} /> */}
                                 <MainView dispatch={dispatch} />
                             </Route>
                             <Route path='/task/:id'>
@@ -71,7 +70,12 @@ const App: React.FC = () => {
                             </Route>
                             <Route path='/newTask'>
                                 <TaskEditor
-                                    task={{ id: Guid.create(), title: '' }}
+                                    task={{
+                                        id: Guid.create(),
+                                        title: '',
+                                        version: 0,
+                                        hash: ''
+                                    }}
                                     isNew
                                     dispatch={dispatch}
                                 />

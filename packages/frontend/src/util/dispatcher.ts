@@ -73,14 +73,6 @@ function handleFilterAction(
     return newState;
 }
 
-function checkAndUpdate(storage: LocalStorage, task: Task): Task {
-    if (!task.created) {
-        task.created = new Date();
-        storage.update(task);
-    }
-    return task;
-}
-
 function handleTaskAction(
     storage: LocalStorage,
     newState: IGlobalState,
@@ -88,7 +80,7 @@ function handleTaskAction(
 ) {
     switch (action.subtype) {
         case 'create':
-            action.task.created = new Date();
+            action.task.created = Date.now();
             newState.tasks.push(action.task);
             storage.create(action.task);
             break;
@@ -114,8 +106,7 @@ function handleTaskAction(
             }
             break;
         case 'load':
-            const task = checkAndUpdate(storage, action.task);
-            newState.tasks.push(task);
+            newState.tasks.push(action.task);
             break;
     }
     newState.contexts = extractContexts(newState.tasks);
