@@ -21,6 +21,7 @@ import {
     grey
 } from '@material-ui/core/colors';
 import { formatDistance } from 'date-fns';
+import { toDateDisplay } from '../util/displayHelper';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -88,7 +89,7 @@ export interface TaskListItemProps {
 function DueClass(task: Task): string {
     const classes = useStyles();
     const today = new Date(Date.now()).toISOString().slice(0, 10);
-    const due = task.due && task.due.toISOString().slice(0, 10);
+    const due = task.due && toDateDisplay(task.due);
     if (!due || due > today) {
         return '';
     }
@@ -126,15 +127,16 @@ function PrioDisplay(props: { prio: TaskPrio }) {
     );
 }
 
-function AgeDisplay(props: { created: Date }) {
+function AgeDisplay(props: { created: Date; task: Task }) {
     const classes = useStyles();
+    const age = formatDistance(props.created, new Date());
     return (
-        <span className={classes.metaEntry}>
-            <SaveAltIcon fontSize='inherit' />
-            <span className={classes.metaText}>
-                {formatDistance(props.created, new Date())} ago
+        props.created && (
+            <span className={classes.metaEntry}>
+                <SaveAltIcon fontSize='inherit' />
+                <span className={classes.metaText}>{age} ago</span>
             </span>
-        </span>
+        )
     );
 }
 
@@ -170,11 +172,16 @@ function MetaDisplay(props: { task: Task }) {
                     className={`${classes.metaEntry} ${DueClass(props.task)}`}>
                     <EventIcon fontSize='inherit' />
                     <span className={classes.metaText}>
-                        {props.task.due.toLocaleDateString()}
+                        {new Date(props.task.due).toLocaleDateString()}
                     </span>
                 </span>
             )}
-            {props.task.created && <AgeDisplay created={props.task.created} />}
+            {props.task.created && (
+                <AgeDisplay
+                    created={new Date(props.task.created)}
+                    task={props.task}
+                />
+            )}
         </Fragment>
     );
 }

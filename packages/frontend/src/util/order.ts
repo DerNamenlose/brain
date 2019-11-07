@@ -1,6 +1,6 @@
-import { Task } from 'brain-common/src/Task';
+import { Task } from 'brain-common';
 
-export const maxDate = new Date('9999-12-31');
+export const maxDate = new Date('9999-12-31').getTime();
 
 /**
  * order objects by multiple fields
@@ -42,7 +42,7 @@ export function sortAndUniqueString(strings: string[]) {
 export const defaultTaskOrder = (t1: Task, t2: Task) =>
     order(t1, t2, [
         t => !!t.done,
-        t => (t.due || maxDate).getTime(),
+        t => t.due || maxDate,
         t => t.priority || 'Z',
         t => t.title.toLocaleLowerCase()
     ]);

@@ -32,6 +32,7 @@ import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { IDispatchReceiver, ITaskAction } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
+import { toDateDisplay } from '../util/displayHelper';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -248,17 +249,15 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 id='due'
                                 type='date'
                                 value={
-                                    (editedTask.due &&
-                                        editedTask.due
-                                            .toISOString()
-                                            .slice(0, 10)) ||
-                                    ''
+                                    editedTask.due &&
+                                    toDateDisplay(editedTask.due)
                                 }
                                 onChange={ev => {
                                     const nv = copyAndUpdate(
                                         editedTask,
                                         'due',
-                                        ev.target.valueAsDate
+                                        ev.target.valueAsDate &&
+                                            ev.target.valueAsDate.getTime()
                                     );
                                     setEditedTask(nv);
                                 }}
