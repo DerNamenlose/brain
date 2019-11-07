@@ -249,8 +249,9 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 id='due'
                                 type='date'
                                 value={
-                                    editedTask.due &&
-                                    toDateDisplay(editedTask.due)
+                                    (editedTask.due &&
+                                        toDateDisplay(editedTask.due)) ||
+                                    ''
                                 }
                                 onChange={ev => {
                                     const nv = copyAndUpdate(
