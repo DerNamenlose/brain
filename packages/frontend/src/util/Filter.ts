@@ -1,4 +1,5 @@
 import { Task } from 'brain-common';
+import { differenceInDays } from 'date-fns/esm';
 
 function matches(filterProperties: string[], taskProperties?: string[]) {
     return (
@@ -16,17 +17,21 @@ export function overviewFilter(
     tasks: Task[],
     selectedContexts: string[],
     selectedProjects: string[],
-    selectedTags: string[]
+    selectedTags: string[],
+    dueIn?: number
 ): Task[] {
-    return tasks.filter(
-        task =>
+    return tasks.filter(task => {
+        return (
             !task.postponed && // postponed tasks are by definition not visible
             !!task.contexts && // only tasks that have a context are in the overview.
             task.contexts.length > 0 && // Tasks without any contexts are in the inbox by definition
             matches(selectedContexts, task.contexts) &&
             matches(selectedProjects, task.projects) &&
-            matches(selectedTags, task.tags)
-    );
+            matches(selectedTags, task.tags) &&
+            (dueIn === undefined ||
+                (task.due && differenceInDays(task.due, new Date()) < dueIn))
+        );
+    });
 }
 
 export function inboxFilter(tasks: Task[]): Task[] {

@@ -2,19 +2,20 @@ import React, { Fragment, useState } from 'react';
 import { ResponsiveButton } from './ResponsiveButton';
 import { Menu, MenuItem, ListItemIcon, ListItemText } from '@material-ui/core';
 
-export interface FilterEntry {
+export interface FilterEntry<T> {
     text: string;
     selected: boolean;
+    value?: T;
 }
 
-export interface FilterButtonProps {
-    entries: FilterEntry[];
+export interface FilterButtonProps<T> {
+    entries: FilterEntry<T>[];
     icon: JSX.Element;
     text: string;
-    onChange?: (selectedEntry: FilterEntry) => void;
+    onChange?: (selectedEntry: FilterEntry<T>) => void;
 }
 
-export function FilterButton(props: FilterButtonProps) {
+export function FilterButton<T>(props: FilterButtonProps<T>) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     return (
         <Fragment>
