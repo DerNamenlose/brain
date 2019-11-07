@@ -142,13 +142,19 @@ export function reducer(
 }
 
 function extractContexts(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.contexts || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.contexts || [])
+    );
 }
 
 function extractProjects(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.projects || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.projects || [])
+    );
 }
 
 function extractTags(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.tags || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.tags || [])
+    );
 }
