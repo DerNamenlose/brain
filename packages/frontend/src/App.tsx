@@ -62,7 +62,7 @@ const App: React.FC = () => {
                 <ThemeProvider theme={theme}>
                     <div className='App'>
                         <Switch>
-                            <Route exact path='/'>
+                            <Route exact path={['/', '/inbox', '/someday']}>
                                 <MainView dispatch={dispatch} />
                             </Route>
                             <Route path='/task/:id'>
