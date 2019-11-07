@@ -27,8 +27,14 @@ export interface IFilterAction {
     name: string;
 }
 
+export interface IDueFilterAction {
+    type: 'due';
+    subtype: 'select' | 'deselect';
+    value?: number;
+}
+
 export interface IDispatchReceiver {
-    dispatch: React.Dispatch<ITaskAction | IFilterAction>;
+    dispatch: React.Dispatch<ITaskAction | IFilterAction | IDueFilterAction>;
 }
 
 function handleFilterAction(
@@ -118,6 +124,19 @@ function handleTaskAction(
     return newState;
 }
 
+function handleDueFilterAction(
+    newState: IGlobalState,
+    action: IDueFilterAction
+) {
+    if (action.subtype === 'deselect') {
+        newState.dueIn = undefined;
+    } else {
+        newState.dueIn = action.value;
+    }
+    console.log(newState);
+    return newState;
+}
+
 /**
  * The global reducer function handling application state transitions
  * @param state The current state of the applicatoin
@@ -126,7 +145,7 @@ function handleTaskAction(
 export function reducer(
     storage: LocalStorage,
     state: IGlobalState,
-    action: ITaskAction | IFilterAction
+    action: ITaskAction | IFilterAction | IDueFilterAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
@@ -137,8 +156,10 @@ export function reducer(
             return handleFilterAction(newState, action as IFilterAction);
         case 'task':
             return handleTaskAction(storage, newState, action as ITaskAction);
+        case 'due':
+            return handleDueFilterAction(newState, action as IDueFilterAction);
     }
-    return state;
+    return newState;
 }
 
 function extractContexts(tasks: Task[]): string[] {

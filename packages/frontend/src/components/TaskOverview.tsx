@@ -15,6 +15,7 @@ import { IDispatchReceiver } from '../util/dispatcher';
 import { overviewFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
 import { TaskList } from './TaskList';
+import { DueFilters } from './DueFilters';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -76,6 +77,7 @@ export function TaskOverview(props: IDispatchReceiver) {
                             <ContextsButton dispatch={props.dispatch} />
                             <ProjectsButton dispatch={props.dispatch} />
                             <TagsButton dispatch={props.dispatch} />
+                            <DueFilters dispatch={props.dispatch} />
                         </Toolbar>
                     </AppBar>
                     <TaskList
@@ -83,7 +85,8 @@ export function TaskOverview(props: IDispatchReceiver) {
                             state.tasks,
                             state.selectedContexts,
                             state.selectedProjects,
-                            state.selectedTags
+                            state.selectedTags,
+                            state.dueIn
                         )}
                     />
                 </Fragment>
