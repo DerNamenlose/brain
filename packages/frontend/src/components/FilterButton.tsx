@@ -33,7 +33,8 @@ export function FilterButton(props: FilterButtonProps) {
                 id='contexts-menu'
                 keepMounted
                 anchorEl={anchorEl}
-                open={Boolean(anchorEl)}>
+                open={Boolean(anchorEl)}
+                onClose={ev => setAnchorEl(null)}>
                 {props.entries.map((entry, index) => (
                     <MenuItem
                         key={entry.text}
