@@ -41,6 +41,11 @@ export interface IDueFilterAction {
     value?: number;
 }
 
+export interface IConfigAction {
+    type: 'loadConfig';
+    config: IGlobalConfig;
+}
+
 export interface IConfigChangeAction {
     type: 'config';
     setting: keyof IGlobalConfig;
@@ -175,6 +180,7 @@ export function reduce(
         | IFilterAction
         | IDueFilterAction
         | IConfigChangeAction
+        | IConfigAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
@@ -190,7 +196,13 @@ export function reduce(
         case 'due':
             return handleDueFilterAction(newState, action as IDueFilterAction);
         case 'config':
-            return handleConfigAction(newState, action as IConfigChangeAction);
+            return handleConfigAction(
+                storage,
+                newState,
+                action as IConfigChangeAction
+            );
+        case 'loadConfig':
+            newState.config = action.config;
     }
     return newState;
 }
@@ -214,6 +226,7 @@ function extractTags(tasks: Task[]): string[] {
 }
 
 export function handleConfigAction(
+    storage: LocalStorage,
     newState: IGlobalState,
     action: IConfigChangeAction
 ): IGlobalState {
@@ -221,6 +234,7 @@ export function handleConfigAction(
         ...newState.config,
         [action.setting]: action.value
     };
+    storage.putConfig(newState.config);
     return newState;
 }
 

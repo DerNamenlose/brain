@@ -55,6 +55,9 @@ const App: React.FC = () => {
             .then(tasks =>
                 dispatch({ type: 'bulk', subtype: 'load', tasks: tasks })
             );
+        storage
+            .config()
+            .then(config => dispatch({ type: 'loadConfig', config: config }));
     }, []);
     return (
         <Router>

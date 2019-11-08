@@ -1,5 +1,4 @@
-import React from 'react';
-
 export interface IGlobalConfig {
+    id: string;
     showDone: boolean;
 }
