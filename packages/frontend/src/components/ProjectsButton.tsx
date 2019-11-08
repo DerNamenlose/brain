@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
-import { IFilterAction, Dispatchers } from '../util/dispatcher';
+import { IFilterAction, Dispatcher } from '../util/dispatcher';
 import { Badge } from '@material-ui/core';
 
 export function ProjectsButton() {
-    const dispatchers = useContext(Dispatchers);
+    const dispatch = useContext(Dispatcher);
     return (
         <GlobalState.Consumer>
             {state => (
@@ -27,7 +27,7 @@ export function ProjectsButton() {
                         )
                     }))}
                     onChange={selectedEntry => {
-                        dispatchers.state({
+                        dispatch({
                             type: 'project',
                             subtype: selectedEntry.selected
                                 ? 'deselect'

@@ -94,6 +94,7 @@ export function TaskOverview() {
                     </AppBar>
                     <TaskList
                         tasks={overviewFilter(
+                            state.config,
                             state.tasks,
                             state.selectedContexts,
                             state.selectedProjects,

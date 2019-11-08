@@ -1,14 +1,15 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import {
     FormControl,
     Checkbox,
     FormControlLabel,
-    Button,
-    AppBar
+    Button
 } from '@material-ui/core';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { makeStyles, createStyles } from '@material-ui/styles';
-import { GlobalConfig } from '../model/GlobalConfig';
+import { Dispatcher } from '../util/dispatcher';
+import { useHistory } from 'react-router';
+import { GlobalState } from '../model/GlobalState';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -24,25 +25,40 @@ const useStyles = makeStyles(theme =>
 
 export function ConfigEditor() {
     const classes = useStyles();
+    const dispatch = useContext(Dispatcher);
+    const history = useHistory();
     return (
-        <GlobalConfig.Consumer>
-            {config => (
+        <GlobalState.Consumer>
+            {state => (
                 <Fragment>
                     <div className={classes.backButtonRoot}>
-                        <Button className={classes.backButton}>
+                        <Button
+                            className={classes.backButton}
+                            onClick={() => history.goBack()}>
                             <ChevronLeftIcon fontSize='large' />
                         </Button>
                     </div>
                     <h1>Configuration</h1>
                     <FormControl>
                         <FormControlLabel
-                            control={<Checkbox id='showDone' />}
+                            control={
+                                <Checkbox
+                                    id='showDone'
+                                    checked={state.config.showDone}
+                                    onChange={ev =>
+                                        dispatch({
+                                            type: 'config',
+                                            setting: 'showDone',
+                                            value: ev.target.checked
+                                        })
+                                    }
+                                />
+                            }
                             label='Show finished tasks'
-                            checked={config.showDone}
                         />
                     </FormControl>
                 </Fragment>
             )}
-        </GlobalConfig.Consumer>
+        </GlobalState.Consumer>
     );
 }

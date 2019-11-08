@@ -4,10 +4,10 @@ import WatchLaterIcon from '@material-ui/icons/WatchLater';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
 import { Badge } from '@material-ui/core';
-import { Dispatchers } from '../util/dispatcher';
+import { Dispatcher } from '../util/dispatcher';
 
 export function DueFilters() {
-    const dispatchers = useContext(Dispatchers);
+    const dispatch = useContext(Dispatcher);
     return (
         <GlobalState.Consumer>
             {state => (
@@ -52,7 +52,7 @@ export function DueFilters() {
                         }
                     ]}
                     onChange={selectedEntry => {
-                        dispatchers.state({
+                        dispatch({
                             type: 'due',
                             subtype: selectedEntry.selected
                                 ? 'deselect'

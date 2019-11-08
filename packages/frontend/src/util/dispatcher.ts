@@ -166,10 +166,15 @@ function handleDueFilterAction(
  * @param state The current state of the applicatoin
  * @param action The action to update the global state
  */
-export function stateReducer(
+export function reduce(
     storage: LocalStorage,
     state: IGlobalState,
-    action: ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
+    action:
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
@@ -184,6 +189,8 @@ export function stateReducer(
             return handleTaskBulkAction(newState, action as ITaskBulkAction);
         case 'due':
             return handleDueFilterAction(newState, action as IDueFilterAction);
+        case 'config':
+            return handleConfigAction(newState, action as IConfigChangeAction);
     }
     return newState;
 }
@@ -206,21 +213,23 @@ function extractTags(tasks: Task[]): string[] {
     );
 }
 
-export function configReducer(
-    state: IGlobalConfig,
+export function handleConfigAction(
+    newState: IGlobalState,
     action: IConfigChangeAction
-): IGlobalConfig {
-    return {
-        ...state,
+): IGlobalState {
+    newState.config = {
+        ...newState.config,
         [action.setting]: action.value
     };
+    return newState;
 }
 
-export interface IDispatchers {
-    state: React.Dispatch<
-        ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
-    >;
-    config: React.Dispatch<IConfigChangeAction>;
-}
-
-export const Dispatchers = React.createContext({} as IDispatchers);
+export const Dispatcher = React.createContext<
+    React.Dispatch<
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
+    >
+>(ev => {});

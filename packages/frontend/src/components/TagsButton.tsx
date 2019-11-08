@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
-import { IFilterAction, Dispatchers } from '../util/dispatcher';
+import { IFilterAction, Dispatcher } from '../util/dispatcher';
 import { Badge } from '@material-ui/core';
 
 /**
@@ -11,7 +11,7 @@ import { Badge } from '@material-ui/core';
  * @param props The properties of the tags button
  */
 export function TagsButton() {
-    const dispatchers = useContext(Dispatchers);
+    const dispatch = useContext(Dispatcher);
     return (
         <GlobalState.Consumer>
             {state => (
@@ -30,7 +30,7 @@ export function TagsButton() {
                         selected: !!state.selectedTags.find(t => t === tag)
                     }))}
                     onChange={selectedEntry => {
-                        dispatchers.state({
+                        dispatch({
                             type: 'tag',
                             subtype: selectedEntry.selected
                                 ? 'deselect'

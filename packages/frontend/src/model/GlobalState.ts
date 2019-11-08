@@ -1,5 +1,6 @@
 import { Task } from 'brain-common';
 import React from 'react';
+import { IGlobalConfig } from './GlobalConfig';
 
 export interface IGlobalState {
     tasks: Task[];
@@ -12,6 +13,7 @@ export interface IGlobalState {
     selectedTags: string[];
     inboxEmpty: boolean;
     somedayMaybeEmpty: boolean;
+    config: IGlobalConfig;
 }
 
 export const GlobalState = React.createContext({} as IGlobalState);
