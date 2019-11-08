@@ -51,9 +51,7 @@ const App: React.FC = () => {
         storage
             .loadTasks()
             .then(tasks =>
-                tasks.forEach(task =>
-                    dispatch({ type: 'task', subtype: 'load', task: task })
-                )
+                dispatch({ type: 'bulk', subtype: 'load', tasks: tasks })
             );
     }, []);
     return (

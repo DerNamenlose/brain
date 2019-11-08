@@ -10,6 +10,12 @@ export interface ITaskAction {
     task: Task;
 }
 
+export interface ITaskBulkAction {
+    type: 'bulk';
+    subtype: 'load';
+    tasks: Task[];
+}
+
 export function taskAction(
     task: Task,
     action: 'create' | 'update' | 'delete' | 'load'
@@ -34,7 +40,9 @@ export interface IDueFilterAction {
 }
 
 export interface IDispatchReceiver {
-    dispatch: React.Dispatch<ITaskAction | IFilterAction | IDueFilterAction>;
+    dispatch: React.Dispatch<
+        ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
+    >;
 }
 
 function handleFilterAction(
@@ -124,6 +132,21 @@ function handleTaskAction(
     return newState;
 }
 
+function handleTaskBulkAction(newState: IGlobalState, action: ITaskBulkAction) {
+    switch (action.subtype) {
+        case 'load':
+            newState.tasks = newState.tasks.concat(action.tasks);
+            break;
+    }
+    newState.contexts = extractContexts(newState.tasks);
+    newState.projects = extractProjects(newState.tasks);
+    newState.tags = extractTags(newState.tasks);
+    newState.inboxEmpty = inboxFilter(newState.tasks).length === 0;
+    newState.somedayMaybeEmpty =
+        somedayMaybeFilter(newState.tasks).length === 0;
+    return newState;
+}
+
 function handleDueFilterAction(
     newState: IGlobalState,
     action: IDueFilterAction
@@ -145,7 +168,7 @@ function handleDueFilterAction(
 export function reducer(
     storage: LocalStorage,
     state: IGlobalState,
-    action: ITaskAction | IFilterAction | IDueFilterAction
+    action: ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
@@ -156,6 +179,8 @@ export function reducer(
             return handleFilterAction(newState, action as IFilterAction);
         case 'task':
             return handleTaskAction(storage, newState, action as ITaskAction);
+        case 'bulk':
+            return handleTaskBulkAction(newState, action as ITaskBulkAction);
         case 'due':
             return handleDueFilterAction(newState, action as IDueFilterAction);
     }
