@@ -156,7 +156,6 @@ function handleDueFilterAction(
     } else {
         newState.dueIn = action.value;
     }
-    console.log(newState);
     return newState;
 }
 

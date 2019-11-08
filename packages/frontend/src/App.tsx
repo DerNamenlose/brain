@@ -16,6 +16,7 @@ import { MainView } from './components/MainView';
 import { createMuiTheme } from '@material-ui/core';
 import { green, red } from '@material-ui/core/colors';
 import { ThemeProvider } from '@material-ui/styles';
+import { ConfigEditor } from './components/ConfigEditor';
 
 function FindTask(props: IDispatchReceiver) {
     const { id } = useParams();
