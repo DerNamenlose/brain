@@ -1,4 +1,3 @@
-import { IDispatchReceiver } from '../util/dispatcher';
 import { Fragment } from 'react';
 import React from 'react';
 import { GlobalState } from '../model/GlobalState';
@@ -15,7 +14,7 @@ const useStyles = makeStyles(() =>
     })
 );
 
-export function Inbox(props: IDispatchReceiver) {
+export function Inbox() {
     const classes = useStyles();
     return (
         <GlobalState.Consumer>

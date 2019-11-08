@@ -12,7 +12,6 @@ import { ContextsButton } from './ContextsButton';
 import { ProjectsButton } from './ProjectsButton';
 import { TagsButton } from './TagsButton';
 import { fade } from '@material-ui/core/styles';
-import { IDispatchReceiver } from '../util/dispatcher';
 import { overviewFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
 import { TaskList } from './TaskList';
@@ -73,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-export function TaskOverview(props: IDispatchReceiver) {
+export function TaskOverview() {
     const classes = useStyles();
     const history = useHistory();
     return (
@@ -82,10 +81,10 @@ export function TaskOverview(props: IDispatchReceiver) {
                 <Fragment>
                     <AppBar className={classes.appBar}>
                         <Toolbar>
-                            <ContextsButton dispatch={props.dispatch} />
-                            <ProjectsButton dispatch={props.dispatch} />
-                            <TagsButton dispatch={props.dispatch} />
-                            <DueFilters dispatch={props.dispatch} />
+                            <ContextsButton />
+                            <ProjectsButton />
+                            <TagsButton />
+                            <DueFilters />
                             <Button
                                 className={classes.settings}
                                 onClick={() => history.push('/config')}>

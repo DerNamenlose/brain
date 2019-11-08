@@ -7,8 +7,8 @@ import {
     AppBar
 } from '@material-ui/core';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import { IDispatchReceiver } from '../util/dispatcher';
 import { makeStyles, createStyles } from '@material-ui/styles';
+import { GlobalConfig } from '../model/GlobalConfig';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -22,22 +22,27 @@ const useStyles = makeStyles(theme =>
     })
 );
 
-export function ConfigEditor(props: IDispatchReceiver) {
+export function ConfigEditor() {
     const classes = useStyles();
     return (
-        <Fragment>
-            <div className={classes.backButtonRoot}>
-                <Button className={classes.backButton}>
-                    <ChevronLeftIcon fontSize='large' />
-                </Button>
-            </div>
-            <h1>Configuration</h1>
-            <FormControl>
-                <FormControlLabel
-                    control={<Checkbox id='showDone' />}
-                    label='Show finished tasks'
-                />
-            </FormControl>
-        </Fragment>
+        <GlobalConfig.Consumer>
+            {config => (
+                <Fragment>
+                    <div className={classes.backButtonRoot}>
+                        <Button className={classes.backButton}>
+                            <ChevronLeftIcon fontSize='large' />
+                        </Button>
+                    </div>
+                    <h1>Configuration</h1>
+                    <FormControl>
+                        <FormControlLabel
+                            control={<Checkbox id='showDone' />}
+                            label='Show finished tasks'
+                            checked={config.showDone}
+                        />
+                    </FormControl>
+                </Fragment>
+            )}
+        </GlobalConfig.Consumer>
     );
 }

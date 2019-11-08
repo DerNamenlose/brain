@@ -1,4 +1,3 @@
-import { IDispatchReceiver } from '../util/dispatcher';
 import {
     Tab,
     Tabs,
@@ -115,7 +114,7 @@ function TabHeader(props: {
     );
 }
 
-function TabContent(props: IDispatchReceiver) {
+function TabContent() {
     const classes = useStyles();
     const smallScreen = useMediaQuery((theme: Theme) =>
         theme.breakpoints.down('xs')
@@ -128,17 +127,17 @@ function TabContent(props: IDispatchReceiver) {
             <Switch>
                 <Route exact path='/'>
                     <TabPanel index={0}>
-                        <TaskOverview dispatch={props.dispatch} />
+                        <TaskOverview />
                     </TabPanel>
                 </Route>
                 <Route path='/inbox'>
                     <TabPanel index={1}>
-                        <Inbox dispatch={props.dispatch} />
+                        <Inbox />
                     </TabPanel>
                 </Route>
                 <Route path='/someday'>
                     <TabPanel index={2}>
-                        <SomedayMaybe dispatch={props.dispatch} />
+                        <SomedayMaybe />
                     </TabPanel>
                 </Route>
             </Switch>
@@ -146,7 +145,7 @@ function TabContent(props: IDispatchReceiver) {
     );
 }
 
-export function MainView(props: IDispatchReceiver) {
+export function MainView() {
     const history = useHistory();
     const classes = useStyles();
     return (
@@ -170,7 +169,7 @@ export function MainView(props: IDispatchReceiver) {
                 top: 'auto',
                 bottom: 0
             }}> */}
-                            <TabContent dispatch={props.dispatch} />
+                            <TabContent />
                             <Fab
                                 color='secondary'
                                 aria-label='add'

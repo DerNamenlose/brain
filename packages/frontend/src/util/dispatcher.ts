@@ -1,8 +1,10 @@
+import React from 'react';
 import { Task } from 'brain-common';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
+import { IGlobalConfig } from '../model/GlobalConfig';
 
 export interface ITaskAction {
     type: 'task';
@@ -39,10 +41,10 @@ export interface IDueFilterAction {
     value?: number;
 }
 
-export interface IDispatchReceiver {
-    dispatch: React.Dispatch<
-        ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
-    >;
+export interface IConfigChangeAction {
+    type: 'config';
+    setting: keyof IGlobalConfig;
+    value: any;
 }
 
 function handleFilterAction(
@@ -164,7 +166,7 @@ function handleDueFilterAction(
  * @param state The current state of the applicatoin
  * @param action The action to update the global state
  */
-export function reducer(
+export function stateReducer(
     storage: LocalStorage,
     state: IGlobalState,
     action: ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
@@ -203,3 +205,22 @@ function extractTags(tasks: Task[]): string[] {
         tasks.filter(task => !task.done).flatMap(task => task.tags || [])
     );
 }
+
+export function configReducer(
+    state: IGlobalConfig,
+    action: IConfigChangeAction
+): IGlobalConfig {
+    return {
+        ...state,
+        [action.setting]: action.value
+    };
+}
+
+export interface IDispatchers {
+    state: React.Dispatch<
+        ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
+    >;
+    config: React.Dispatch<IConfigChangeAction>;
+}
+
+export const Dispatchers = React.createContext({} as IDispatchers);
