@@ -1,5 +1,6 @@
 import { Task } from 'brain-common';
 import { differenceInDays } from 'date-fns/esm';
+import { IGlobalConfig } from '../model/GlobalConfig';
 
 function matches(filterProperties: string[], taskProperties?: string[]) {
     return (
@@ -14,6 +15,7 @@ function matches(filterProperties: string[], taskProperties?: string[]) {
 }
 
 export function overviewFilter(
+    config: IGlobalConfig,
     tasks: Task[],
     selectedContexts: string[],
     selectedProjects: string[],
@@ -25,6 +27,7 @@ export function overviewFilter(
             !task.postponed && // postponed tasks are by definition not visible
             !!task.contexts && // only tasks that have a context are in the overview.
             task.contexts.length > 0 && // Tasks without any contexts are in the inbox by definition
+            (config.showDone || !task.done) && // show done tasks only when requested by the config
             matches(selectedContexts, task.contexts) &&
             matches(selectedProjects, task.projects) &&
             matches(selectedTags, task.tags) &&

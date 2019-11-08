@@ -3,8 +3,13 @@ import { openDB, IDBPDatabase, DBSchema, IDBPTransaction } from 'idb';
 import { Guid } from 'guid-typescript';
 import hash from 'object-hash';
 import { TaskDto } from 'brain-common';
+import { IGlobalConfig } from '../model/GlobalConfig';
 
-interface TaskDBSchema extends DBSchema {
+interface TaskDBSchema extends TaskDBSchemav2Schema {
+    config: { key: string; value: IGlobalConfig };
+}
+
+interface TaskDBSchemav2Schema extends DBSchema {
     tasks: { key: string; value: TaskDto };
 }
 
@@ -49,13 +54,38 @@ export class LocalStorage {
         await tx.done;
     }
 
+    public async config(): Promise<IGlobalConfig> {
+        const db = await this.openDb();
+        return (
+            (await db
+                .transaction('config')
+                .objectStore('config')
+                .get('global')) || {
+                id: 'global',
+                showDone: false
+            }
+        );
+    }
+
+    public async putConfig(config: IGlobalConfig): Promise<void> {
+        const db = await this.openDb();
+        const storedValue = {
+            ...config,
+            id: 'global'
+        };
+        await db
+            .transaction('config', 'readwrite')
+            .objectStore('config')
+            .put(storedValue);
+    }
+
     private static updateVersion(task: TaskDto): TaskDto {
         const newVersion = (task.version || 0) + 1;
         return { ...task, version: newVersion, hash: hash(task) };
     }
 
     private async openDb() {
-        const db = await openDB<TaskDBSchema>('tasks', 2, {
+        const db = await openDB<TaskDBSchema>('tasks', 3, {
             async upgrade(db, oldVersion, newVersion, transaction) {
                 console.log(`Upgrading database to version ${newVersion}`);
                 if (oldVersion < 1) {
@@ -63,6 +93,9 @@ export class LocalStorage {
                 }
                 if (oldVersion < 2) {
                     LocalStorage.upgradeV2(transaction);
+                }
+                if (oldVersion < 3) {
+                    LocalStorage.upgradeV3(db);
                 }
                 console.log('Finished.');
             }
@@ -77,10 +110,10 @@ export class LocalStorage {
     }
 
     private static async upgradeV2(
-        transaction: IDBPTransaction<TaskDBSchema, 'tasks'[]>
+        transaction: IDBPTransaction<TaskDBSchema, ('tasks' | 'config')[]>
     ) {
         console.log('Transforming all existing objects to v2 schema');
-        const oldDb = await openDB<TaskDBv1Schema>('tasks', 2); // This does feel slightly wrong, but should be OK at this point, as no update has taken place yet
+        const oldDb = await openDB<TaskDBv1Schema>('tasks', 3); // This does feel slightly wrong, but should be OK at this point, as no update has taken place yet
         const objects = await oldDb
             .transaction('tasks', 'readonly')
             .objectStore('tasks')
@@ -99,5 +132,9 @@ export class LocalStorage {
                 .objectStore('tasks')
                 .put(LocalStorage.updateVersion(newObject));
         }
+    }
+
+    private static async upgradeV3(db: IDBPDatabase<TaskDBSchema>) {
+        db.createObjectStore('config', { keyPath: 'id' });
     }
 }

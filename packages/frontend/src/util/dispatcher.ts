@@ -1,8 +1,10 @@
+import React from 'react';
 import { Task } from 'brain-common';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
+import { IGlobalConfig } from '../model/GlobalConfig';
 
 export interface ITaskAction {
     type: 'task';
@@ -39,10 +41,15 @@ export interface IDueFilterAction {
     value?: number;
 }
 
-export interface IDispatchReceiver {
-    dispatch: React.Dispatch<
-        ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
-    >;
+export interface IConfigAction {
+    type: 'loadConfig';
+    config: IGlobalConfig;
+}
+
+export interface IConfigChangeAction {
+    type: 'config';
+    setting: keyof IGlobalConfig;
+    value: any;
 }
 
 function handleFilterAction(
@@ -156,7 +163,6 @@ function handleDueFilterAction(
     } else {
         newState.dueIn = action.value;
     }
-    console.log(newState);
     return newState;
 }
 
@@ -165,10 +171,16 @@ function handleDueFilterAction(
  * @param state The current state of the applicatoin
  * @param action The action to update the global state
  */
-export function reducer(
+export function reduce(
     storage: LocalStorage,
     state: IGlobalState,
-    action: ITaskAction | ITaskBulkAction | IFilterAction | IDueFilterAction
+    action:
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
+        | IConfigAction
 ): IGlobalState {
     const newState = { ...state };
     newState.tasks = [...state.tasks];
@@ -183,6 +195,14 @@ export function reducer(
             return handleTaskBulkAction(newState, action as ITaskBulkAction);
         case 'due':
             return handleDueFilterAction(newState, action as IDueFilterAction);
+        case 'config':
+            return handleConfigAction(
+                storage,
+                newState,
+                action as IConfigChangeAction
+            );
+        case 'loadConfig':
+            newState.config = action.config;
     }
     return newState;
 }
@@ -204,3 +224,26 @@ function extractTags(tasks: Task[]): string[] {
         tasks.filter(task => !task.done).flatMap(task => task.tags || [])
     );
 }
+
+export function handleConfigAction(
+    storage: LocalStorage,
+    newState: IGlobalState,
+    action: IConfigChangeAction
+): IGlobalState {
+    newState.config = {
+        ...newState.config,
+        [action.setting]: action.value
+    };
+    storage.putConfig(newState.config);
+    return newState;
+}
+
+export const Dispatcher = React.createContext<
+    React.Dispatch<
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
+    >
+>(ev => {});

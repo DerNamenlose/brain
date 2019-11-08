@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import WatchLaterIcon from '@material-ui/icons/WatchLater';
 
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
-import { IDispatchReceiver } from '../util/dispatcher';
 import { Badge } from '@material-ui/core';
+import { Dispatcher } from '../util/dispatcher';
 
-export function DueFilters(props: IDispatchReceiver) {
+export function DueFilters() {
+    const dispatch = useContext(Dispatcher);
     return (
         <GlobalState.Consumer>
             {state => (
@@ -51,7 +52,7 @@ export function DueFilters(props: IDispatchReceiver) {
                         }
                     ]}
                     onChange={selectedEntry => {
-                        props.dispatch({
+                        dispatch({
                             type: 'due',
                             subtype: selectedEntry.selected
                                 ? 'deselect'

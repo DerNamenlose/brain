@@ -1,5 +1,5 @@
 import { Task } from 'brain-common';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useContext } from 'react';
 import React from 'react';
 import {
     Input,
@@ -30,7 +30,7 @@ import ReactSelectMaterialUi from 'react-select-material-ui';
 import { copyAndUpdate } from '../util/copyUpdater';
 import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
-import { IDispatchReceiver, ITaskAction } from '../util/dispatcher';
+import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
 import { toDateDisplay } from '../util/displayHelper';
 
@@ -379,12 +379,13 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
     );
 }
 
-export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
+export function TaskEditor(props: TaskEditorProps) {
     const history = useHistory();
+    const dispatch = useContext(Dispatcher);
 
     const handlePostpone = (newState: Task) => {
         newState.postponed = !newState.postponed;
-        props.dispatch({
+        dispatch({
             type: 'task',
             subtype: props.isNew ? 'create' : 'update',
             task: newState
@@ -393,7 +394,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
     };
 
     const handleSave = (newState: Task) => {
-        props.dispatch({
+        dispatch({
             type: 'task',
             subtype: props.isNew ? 'create' : 'update',
             task: newState
