@@ -1,5 +1,9 @@
 # brain user documentation 
 
+## Demo
+
+Have a look at the [demo](demo).
+
 ## Installation
 
 ***Note:*** Currently brain operates pureley locally in the browser,

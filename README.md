@@ -19,7 +19,7 @@ If you want to know more about it, [Wikipedia](https://en.wikipedia.org/wiki/Get
 might be a better place to start.)
 
 Read the [docs](docs/index.md) for details on how to set up
-and use brain.
+and use brain. You can also have a look at the [demo](docs/demo).
 
 ***NOTE:*** Even though brain is a PWA, which is supposed to
 sync between multiple devices at some point, it currently only
