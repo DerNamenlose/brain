@@ -27,3 +27,6 @@ uses local storage in the browser (specifically the IndexDB).
 The synchronization server is currently not implemented. If
 you need multiple-device synchronization, either wait until it's
 done or [contribute.](docs/contributing.md).
+
+***Note: (another one)*** brain is in no way endorsed by or related
+to David Allen or his company.
