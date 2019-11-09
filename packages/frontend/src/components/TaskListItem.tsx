@@ -4,7 +4,8 @@ import {
     ListItem,
     ListItemText,
     makeStyles,
-    createStyles
+    createStyles,
+    Typography
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import LandscapeIcon from '@material-ui/icons/Landscape';
@@ -12,6 +13,7 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import EventIcon from '@material-ui/icons/Event';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import PlayCircleIcon from '@material-ui/icons/PlayCircleOutline';
 import {
     red,
     orange,
@@ -21,6 +23,7 @@ import {
     grey
 } from '@material-ui/core/colors';
 import { formatDistance } from 'date-fns';
+import { toDateDisplay } from '../util/displayHelper';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -88,7 +91,7 @@ export interface TaskListItemProps {
 function DueClass(task: Task): string {
     const classes = useStyles();
     const today = new Date(Date.now()).toISOString().slice(0, 10);
-    const due = task.due && task.due.toISOString().slice(0, 10);
+    const due = task.due && toDateDisplay(task.due);
     if (!due || due > today) {
         return '';
     }
@@ -126,15 +129,17 @@ function PrioDisplay(props: { prio: TaskPrio }) {
     );
 }
 
-function AgeDisplay(props: { created: Date }) {
+function AgeDisplay(props: { created: Date; task: Task }) {
     const classes = useStyles();
+    const age = formatDistance(props.created, new Date());
     return (
-        <span className={classes.metaEntry}>
-            <SaveAltIcon fontSize='inherit' />
-            <span className={classes.metaText}>
-                {formatDistance(props.created, new Date())} ago
+        props.created && (
+            <span className={classes.metaEntry}>
+                <SaveAltIcon fontSize='inherit' />
+                <Typography variant='srOnly'>Age</Typography>
+                <span className={classes.metaText}>{age} ago</span>
             </span>
-        </span>
+        )
     );
 }
 
@@ -146,6 +151,7 @@ function MetaDisplay(props: { task: Task }) {
             {props.task.contexts && props.task.contexts.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LandscapeIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Contexts</Typography>
                     <span className={classes.metaText}>
                         {props.task.contexts.join(', ')}
                     </span>
@@ -154,14 +160,25 @@ function MetaDisplay(props: { task: Task }) {
             {props.task.projects && props.task.projects.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <TableChartIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Projects</Typography>
                     {props.task.projects.join(', ')}
                 </span>
             )}{' '}
             {props.task.tags && props.task.tags.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LocalOfferIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Tags</Typography>
                     <span className={classes.metaText}>
                         {props.task.tags.join(', ')}
+                    </span>
+                </span>
+            )}{' '}
+            {props.task.start && (
+                <span className={classes.metaEntry}>
+                    <PlayCircleIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Start date</Typography>
+                    <span className={classes.metaText}>
+                        {new Date(props.task.start).toLocaleDateString()}
                     </span>
                 </span>
             )}{' '}
@@ -169,12 +186,18 @@ function MetaDisplay(props: { task: Task }) {
                 <span
                     className={`${classes.metaEntry} ${DueClass(props.task)}`}>
                     <EventIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Due date</Typography>
                     <span className={classes.metaText}>
-                        {props.task.due.toLocaleDateString()}
+                        {new Date(props.task.due).toLocaleDateString()}
                     </span>
                 </span>
+            )}{' '}
+            {props.task.created && (
+                <AgeDisplay
+                    created={new Date(props.task.created)}
+                    task={props.task}
+                />
             )}
-            {props.task.created && <AgeDisplay created={props.task.created} />}
         </Fragment>
     );
 }

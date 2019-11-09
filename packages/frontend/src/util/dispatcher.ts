@@ -1,13 +1,21 @@
+import React from 'react';
 import { Task } from 'brain-common';
 import { IGlobalState } from '../model/GlobalState';
 import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
+import { IGlobalConfig } from '../model/GlobalConfig';
 
 export interface ITaskAction {
     type: 'task';
     subtype: 'create' | 'update' | 'delete' | 'load';
     task: Task;
+}
+
+export interface ITaskBulkAction {
+    type: 'bulk';
+    subtype: 'load';
+    tasks: Task[];
 }
 
 export function taskAction(
@@ -27,8 +35,21 @@ export interface IFilterAction {
     name: string;
 }
 
-export interface IDispatchReceiver {
-    dispatch: React.Dispatch<ITaskAction | IFilterAction>;
+export interface IDueFilterAction {
+    type: 'due';
+    subtype: 'select' | 'deselect';
+    value?: number;
+}
+
+export interface IConfigAction {
+    type: 'loadConfig';
+    config: IGlobalConfig;
+}
+
+export interface IConfigChangeAction {
+    type: 'config';
+    setting: keyof IGlobalConfig;
+    value: any;
 }
 
 function handleFilterAction(
@@ -73,14 +94,6 @@ function handleFilterAction(
     return newState;
 }
 
-function checkAndUpdate(storage: LocalStorage, task: Task): Task {
-    if (!task.created) {
-        task.created = new Date();
-        storage.update(task);
-    }
-    return task;
-}
-
 function handleTaskAction(
     storage: LocalStorage,
     newState: IGlobalState,
@@ -88,7 +101,7 @@ function handleTaskAction(
 ) {
     switch (action.subtype) {
         case 'create':
-            action.task.created = new Date();
+            action.task.created = Date.now();
             newState.tasks.push(action.task);
             storage.create(action.task);
             break;
@@ -114,16 +127,30 @@ function handleTaskAction(
             }
             break;
         case 'load':
-            const task = checkAndUpdate(storage, action.task);
-            newState.tasks.push(task);
+            newState.tasks.push(action.task);
             break;
     }
-    newState.contexts = extractContexts(newState.tasks);
-    newState.projects = extractProjects(newState.tasks);
-    newState.tags = extractTags(newState.tasks);
-    newState.inboxEmpty = inboxFilter(newState.tasks).length === 0;
-    newState.somedayMaybeEmpty =
-        somedayMaybeFilter(newState.tasks).length === 0;
+    return newState;
+}
+
+function handleTaskBulkAction(newState: IGlobalState, action: ITaskBulkAction) {
+    switch (action.subtype) {
+        case 'load':
+            newState.tasks = newState.tasks.concat(action.tasks);
+            break;
+    }
+    return newState;
+}
+
+function handleDueFilterAction(
+    newState: IGlobalState,
+    action: IDueFilterAction
+) {
+    if (action.subtype === 'deselect') {
+        newState.dueIn = undefined;
+    } else {
+        newState.dueIn = action.value;
+    }
     return newState;
 }
 
@@ -132,32 +159,101 @@ function handleTaskAction(
  * @param state The current state of the applicatoin
  * @param action The action to update the global state
  */
-export function reducer(
+export function reduce(
     storage: LocalStorage,
     state: IGlobalState,
-    action: ITaskAction | IFilterAction
+    action:
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
+        | IConfigAction
 ): IGlobalState {
-    const newState = { ...state };
+    let newState = { ...state };
     newState.tasks = [...state.tasks];
     switch (action.type) {
         case 'context':
         case 'project':
         case 'tag':
-            return handleFilterAction(newState, action as IFilterAction);
+            newState = handleFilterAction(newState, action as IFilterAction);
+            break;
         case 'task':
-            return handleTaskAction(storage, newState, action as ITaskAction);
+            newState = handleTaskAction(
+                storage,
+                newState,
+                action as ITaskAction
+            );
+            break;
+        case 'bulk':
+            newState = handleTaskBulkAction(
+                newState,
+                action as ITaskBulkAction
+            );
+            break;
+        case 'due':
+            newState = handleDueFilterAction(
+                newState,
+                action as IDueFilterAction
+            );
+            break;
+        case 'config':
+            newState = handleConfigAction(
+                storage,
+                newState,
+                action as IConfigChangeAction
+            );
+            break;
+        case 'loadConfig':
+            newState.config = action.config;
     }
-    return state;
+    newState.contexts = extractContexts(newState.tasks);
+    newState.projects = extractProjects(newState.tasks);
+    newState.tags = extractTags(newState.tasks);
+    newState.inboxEmpty =
+        inboxFilter(newState.config, newState.tasks).length === 0;
+    newState.somedayMaybeEmpty =
+        somedayMaybeFilter(newState.tasks).length === 0;
+    return newState;
 }
 
 function extractContexts(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.contexts || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.contexts || [])
+    );
 }
 
 function extractProjects(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.projects || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.projects || [])
+    );
 }
 
 function extractTags(tasks: Task[]): string[] {
-    return sortAndUniqueString(tasks.flatMap(task => task.tags || []));
+    return sortAndUniqueString(
+        tasks.filter(task => !task.done).flatMap(task => task.tags || [])
+    );
 }
+
+export function handleConfigAction(
+    storage: LocalStorage,
+    newState: IGlobalState,
+    action: IConfigChangeAction
+): IGlobalState {
+    newState.config = {
+        ...newState.config,
+        [action.setting]: action.value
+    };
+    storage.putConfig(newState.config);
+    return newState;
+}
+
+export const Dispatcher = React.createContext<
+    React.Dispatch<
+        | ITaskAction
+        | ITaskBulkAction
+        | IFilterAction
+        | IDueFilterAction
+        | IConfigChangeAction
+    >
+>(ev => {});

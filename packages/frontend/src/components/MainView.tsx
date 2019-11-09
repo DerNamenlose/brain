@@ -1,4 +1,3 @@
-import { IDispatchReceiver } from '../util/dispatcher';
 import {
     Tab,
     Tabs,
@@ -11,16 +10,15 @@ import InboxIcon from '@material-ui/icons/Inbox';
 import ListIcon from '@material-ui/icons/List';
 import AddIcon from '@material-ui/icons/Add';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { makeStyles, createStyles } from '@material-ui/styles';
 import { TaskOverview } from './TaskOverview';
 import { Inbox } from './Inbox';
 import { SomedayMaybe } from './SomedayMaybe';
-import { useHistory } from 'react-router';
+import { useHistory, Route, Switch } from 'react-router';
 import { GlobalState } from '../model/GlobalState';
 
 interface TabPanelProps {
-    value: number;
     index: number;
     children?: React.ReactNode;
 }
@@ -29,7 +27,6 @@ function TabPanel(props: TabPanelProps) {
     return (
         <Typography
             component='div'
-            hidden={props.value !== props.index}
             role='tabpanel'
             id={`full-width-tabpanel-${props.index}`}>
             {props.children}
@@ -74,78 +71,116 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-export function MainView(props: IDispatchReceiver) {
+function TabHeader(props: {
+    path: string;
+    inboxEmpty: boolean;
+    somedayMaybeEmpty: boolean;
+}) {
     const history = useHistory();
     const classes = useStyles();
-    const [value, setValue] = useState(0);
     const smallScreen = useMediaQuery((theme: Theme) =>
         theme.breakpoints.down('xs')
     );
     return (
+        <Tabs
+            variant='fullWidth'
+            indicatorColor='primary'
+            value={props.path}
+            className={classes.tabs}>
+            <Tab
+                icon={<ListIcon />}
+                label={smallScreen ? undefined : 'Tasks'}
+                aria-label='Tasks'
+                value='/'
+                onClick={ev => history.push('/')}
+            />
+            <Tab
+                icon={<InboxIcon />}
+                label={smallScreen ? undefined : 'Inbox'}
+                aria-label='Inbox'
+                disabled={props.inboxEmpty}
+                value='/inbox'
+                onClick={ev => history.push('/inbox')}
+            />
+            <Tab
+                icon={<AllInclusiveIcon />}
+                label={smallScreen ? undefined : 'Someday/Maybe'}
+                aria-label='Inbox'
+                disabled={props.somedayMaybeEmpty}
+                value='/someday'
+                onClick={ev => history.push('/someday')}
+            />
+        </Tabs>
+    );
+}
+
+function TabContent() {
+    const classes = useStyles();
+    const smallScreen = useMediaQuery((theme: Theme) =>
+        theme.breakpoints.down('xs')
+    );
+    return (
+        <div
+            className={`${classes.tabPanel} ${
+                smallScreen ? classes.smallBorder : classes.normalBorder
+            }`}>
+            <Switch>
+                <Route exact path='/'>
+                    <TabPanel index={0}>
+                        <TaskOverview />
+                    </TabPanel>
+                </Route>
+                <Route path='/inbox'>
+                    <TabPanel index={1}>
+                        <Inbox />
+                    </TabPanel>
+                </Route>
+                <Route path='/someday'>
+                    <TabPanel index={2}>
+                        <SomedayMaybe />
+                    </TabPanel>
+                </Route>
+            </Switch>
+        </div>
+    );
+}
+
+export function MainView() {
+    const history = useHistory();
+    const classes = useStyles();
+    return (
         <GlobalState.Consumer>
             {state => (
-                <Fragment>
-                    <Tabs
-                        variant='fullWidth'
-                        onChange={(ev, newValue) => {
-                            setValue(newValue);
-                        }}
-                        indicatorColor='primary'
-                        value={value}
-                        className={classes.tabs}>
-                        <Tab
-                            icon={<ListIcon />}
-                            label={smallScreen ? undefined : 'Tasks'}
-                            aria-label='Tasks'
-                        />
-                        <Tab
-                            icon={<InboxIcon />}
-                            label={smallScreen ? undefined : 'Inbox'}
-                            aria-label='Inbox'
-                            disabled={state.inboxEmpty}
-                        />
-                        <Tab
-                            icon={<AllInclusiveIcon />}
-                            label={smallScreen ? undefined : 'Someday/Maybe'}
-                            aria-label='Inbox'
-                            disabled={state.somedayMaybeEmpty}
-                        />
-                    </Tabs>
-                    {/* <SwipeableViews
-                axis='x'
-                index={value}
-                onChangeIndex={newValue => {
-                    setValue(newValue);
-                }}
-                style={{
-                    top: 'auto',
-                    bottom: 0
-                }}> */}
-                    <div
-                        className={`${classes.tabPanel} ${
-                            smallScreen
-                                ? classes.smallBorder
-                                : classes.normalBorder
-                        }`}>
-                        <TabPanel value={value} index={0}>
-                            <TaskOverview dispatch={props.dispatch} />
-                        </TabPanel>
-                        <TabPanel value={value} index={1}>
-                            <Inbox dispatch={props.dispatch} />
-                        </TabPanel>
-                        <TabPanel value={value} index={2}>
-                            <SomedayMaybe dispatch={props.dispatch} />
-                        </TabPanel>
-                    </div>
-                    <Fab
-                        color='secondary'
-                        aria-label='add'
-                        className={classes.addButton}
-                        onClick={() => history.push('/newTask')}>
-                        <AddIcon />
-                    </Fab>
-                    {/* </SwipeableViews> */}
-                </Fragment>
+                <Route
+                    render={match => (
+                        <Fragment>
+                            <TabHeader
+                                path={match.location.pathname}
+                                inboxEmpty={state.inboxEmpty}
+                                somedayMaybeEmpty={state.somedayMaybeEmpty}
+                            />
+                            {/* <SwipeableViews
+            axis='x'
+            index={value}
+            onChangeIndex={newValue => {
+                setValue(newValue);
+            }}
+            style={{
+                top: 'auto',
+                bottom: 0
+            }}> */}
+                            <TabContent />
+                            <Fab
+                                color='secondary'
+                                aria-label='add'
+                                className={classes.addButton}
+                                onClick={() => history.push('/newTask')}>
+                                <AddIcon />
+                            </Fab>
+                            {/* </SwipeableViews> */}
+                        </Fragment>
+                    )}
+                />
             )}
         </GlobalState.Consumer>
     );

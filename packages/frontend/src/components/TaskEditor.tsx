@@ -1,5 +1,5 @@
 import { Task } from 'brain-common';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useContext } from 'react';
 import React from 'react';
 import {
     Input,
@@ -30,8 +30,9 @@ import ReactSelectMaterialUi from 'react-select-material-ui';
 import { copyAndUpdate } from '../util/copyUpdater';
 import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
-import { IDispatchReceiver, ITaskAction } from '../util/dispatcher';
+import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
+import { toDateDisplay } from '../util/displayHelper';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -243,22 +244,42 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                             values={editedTask.tags}
                         />
                         <FormControl>
+                            Start:
+                            <input
+                                id='start'
+                                type='date'
+                                value={
+                                    (editedTask.start &&
+                                        toDateDisplay(editedTask.start)) ||
+                                    ''
+                                }
+                                onChange={ev => {
+                                    const nv = copyAndUpdate(
+                                        editedTask,
+                                        'start',
+                                        ev.target.valueAsDate &&
+                                            ev.target.valueAsDate.getTime()
+                                    );
+                                    setEditedTask(nv);
+                                }}
+                            />
+                        </FormControl>
+                        <FormControl>
                             Due:
                             <input
                                 id='due'
                                 type='date'
                                 value={
                                     (editedTask.due &&
-                                        editedTask.due
-                                            .toISOString()
-                                            .slice(0, 10)) ||
+                                        toDateDisplay(editedTask.due)) ||
                                     ''
                                 }
                                 onChange={ev => {
                                     const nv = copyAndUpdate(
                                         editedTask,
                                         'due',
-                                        ev.target.valueAsDate
+                                        ev.target.valueAsDate &&
+                                            ev.target.valueAsDate.getTime()
                                     );
                                     setEditedTask(nv);
                                 }}
@@ -379,12 +400,13 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
     );
 }
 
-export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
+export function TaskEditor(props: TaskEditorProps) {
     const history = useHistory();
+    const dispatch = useContext(Dispatcher);
 
     const handlePostpone = (newState: Task) => {
         newState.postponed = !newState.postponed;
-        props.dispatch({
+        dispatch({
             type: 'task',
             subtype: props.isNew ? 'create' : 'update',
             task: newState
@@ -393,7 +415,7 @@ export function TaskEditor(props: TaskEditorProps & IDispatchReceiver) {
     };
 
     const handleSave = (newState: Task) => {
-        props.dispatch({
+        dispatch({
             type: 'task',
             subtype: props.isNew ? 'create' : 'update',
             task: newState

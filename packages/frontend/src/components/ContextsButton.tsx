@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import LandscapeIcon from '@material-ui/icons/Landscape';
 import { FilterButton } from './FilterButton';
-import { IDispatchReceiver, IFilterAction } from '../util/dispatcher';
+import { IFilterAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
 import { Badge } from '@material-ui/core';
 
@@ -10,7 +10,8 @@ import { Badge } from '@material-ui/core';
  *
  * @param props The properties of the contexts button
  */
-export function ContextsButton(props: IDispatchReceiver) {
+export function ContextsButton() {
+    const dispatch = useContext(Dispatcher);
     return (
         <GlobalState.Consumer>
             {state => (
@@ -29,7 +30,7 @@ export function ContextsButton(props: IDispatchReceiver) {
                         selected: !!state.selectedContexts.find(c => c === ctx)
                     }))}
                     onChange={selectedEntry => {
-                        props.dispatch({
+                        dispatch({
                             type: 'context',
                             subtype: selectedEntry.selected
                                 ? 'deselect'

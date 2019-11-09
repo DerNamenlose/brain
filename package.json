@@ -1,7 +1,12 @@
 {
-  "name": "root",
-  "private": true,
-  "devDependencies": {
-    "lerna": "^3.18.3"
-  }
+    "name": "brain",
+    "private": true,
+    "author": {
+        "name": "Markus Brueckner",
+        "email": "namenlos@geekbetrieb.de"
+    },
+    "license": "GPL-3.0-only",
+    "devDependencies": {
+        "lerna": "^3.18.3"
+    }
 }

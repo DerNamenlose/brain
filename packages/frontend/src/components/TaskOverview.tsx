@@ -5,16 +5,19 @@ import {
     Toolbar,
     makeStyles,
     createStyles,
-    Theme
+    Theme,
+    Button
 } from '@material-ui/core';
 import { ContextsButton } from './ContextsButton';
 import { ProjectsButton } from './ProjectsButton';
 import { TagsButton } from './TagsButton';
 import { fade } from '@material-ui/core/styles';
-import { IDispatchReceiver } from '../util/dispatcher';
 import { overviewFilter } from '../util/Filter';
 import { GlobalState } from '../model/GlobalState';
 import { TaskList } from './TaskList';
+import { DueFilters } from './DueFilters';
+import SettingsIcon from '@material-ui/icons/Settings';
+import { useHistory } from 'react-router';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -61,29 +64,42 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         task: {
             margin: 2
+        },
+        settings: {
+            marginLeft: 'auto',
+            marginRight: 0
         }
     })
 );
 
-export function TaskOverview(props: IDispatchReceiver) {
+export function TaskOverview() {
     const classes = useStyles();
+    const history = useHistory();
     return (
         <GlobalState.Consumer>
             {state => (
                 <Fragment>
                     <AppBar className={classes.appBar}>
                         <Toolbar>
-                            <ContextsButton dispatch={props.dispatch} />
-                            <ProjectsButton dispatch={props.dispatch} />
-                            <TagsButton dispatch={props.dispatch} />
+                            <ContextsButton />
+                            <ProjectsButton />
+                            <TagsButton />
+                            <DueFilters />
+                            <Button
+                                className={classes.settings}
+                                onClick={() => history.push('/config')}>
+                                <SettingsIcon className={classes.settings} />
+                            </Button>
                         </Toolbar>
                     </AppBar>
                     <TaskList
                         tasks={overviewFilter(
+                            state.config,
                             state.tasks,
                             state.selectedContexts,
                             state.selectedProjects,
-                            state.selectedTags
+                            state.selectedTags,
+                            state.dueIn
                         )}
                     />
                 </Fragment>
