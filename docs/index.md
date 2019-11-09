@@ -2,7 +2,7 @@
 
 ## Demo
 
-Have a look at the [demo](demo).
+Have a look at the [demo](https://dernamenlose.github.io/brain/).
 
 ## Installation
 
