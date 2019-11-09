@@ -4,7 +4,8 @@ import {
     ListItem,
     ListItemText,
     makeStyles,
-    createStyles
+    createStyles,
+    Typography
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import LandscapeIcon from '@material-ui/icons/Landscape';
@@ -12,6 +13,7 @@ import TableChartIcon from '@material-ui/icons/TableChart';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import EventIcon from '@material-ui/icons/Event';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import PlayCircleIcon from '@material-ui/icons/PlayCircleOutline';
 import {
     red,
     orange,
@@ -134,6 +136,7 @@ function AgeDisplay(props: { created: Date; task: Task }) {
         props.created && (
             <span className={classes.metaEntry}>
                 <SaveAltIcon fontSize='inherit' />
+                <Typography variant='srOnly'>Age</Typography>
                 <span className={classes.metaText}>{age} ago</span>
             </span>
         )
@@ -148,6 +151,7 @@ function MetaDisplay(props: { task: Task }) {
             {props.task.contexts && props.task.contexts.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LandscapeIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Contexts</Typography>
                     <span className={classes.metaText}>
                         {props.task.contexts.join(', ')}
                     </span>
@@ -156,14 +160,25 @@ function MetaDisplay(props: { task: Task }) {
             {props.task.projects && props.task.projects.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <TableChartIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Projects</Typography>
                     {props.task.projects.join(', ')}
                 </span>
             )}{' '}
             {props.task.tags && props.task.tags.length !== 0 && (
                 <span className={classes.metaEntry}>
                     <LocalOfferIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Tags</Typography>
                     <span className={classes.metaText}>
                         {props.task.tags.join(', ')}
+                    </span>
+                </span>
+            )}{' '}
+            {props.task.start && (
+                <span className={classes.metaEntry}>
+                    <PlayCircleIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Start date</Typography>
+                    <span className={classes.metaText}>
+                        {new Date(props.task.start).toLocaleDateString()}
                     </span>
                 </span>
             )}{' '}
@@ -171,11 +186,12 @@ function MetaDisplay(props: { task: Task }) {
                 <span
                     className={`${classes.metaEntry} ${DueClass(props.task)}`}>
                     <EventIcon fontSize='inherit' />
+                    <Typography variant='srOnly'>Due date</Typography>
                     <span className={classes.metaText}>
                         {new Date(props.task.due).toLocaleDateString()}
                     </span>
                 </span>
-            )}
+            )}{' '}
             {props.task.created && (
                 <AgeDisplay
                     created={new Date(props.task.created)}

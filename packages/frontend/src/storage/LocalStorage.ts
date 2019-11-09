@@ -62,7 +62,8 @@ export class LocalStorage {
                 .objectStore('config')
                 .get('global')) || {
                 id: 'global',
-                showDone: false
+                showDone: false,
+                showFutureStart: false
             }
         );
     }

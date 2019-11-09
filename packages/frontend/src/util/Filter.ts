@@ -28,6 +28,9 @@ export function overviewFilter(
             !!task.contexts && // only tasks that have a context are in the overview.
             task.contexts.length > 0 && // Tasks without any contexts are in the inbox by definition
             (config.showDone || !task.done) && // show done tasks only when requested by the config
+            (config.showFutureStart ||
+                !task.start ||
+                task.start <= Date.now()) && // show items depending on whether their start date has passed
             matches(selectedContexts, task.contexts) &&
             matches(selectedProjects, task.projects) &&
             matches(selectedTags, task.tags) &&
@@ -37,11 +40,16 @@ export function overviewFilter(
     });
 }
 
-export function inboxFilter(tasks: Task[]): Task[] {
-    return tasks.filter(
-        task =>
-            !task.postponed && (!task.contexts || task.contexts.length === 0)
-    ); // The inbox contains (by definition) tasks not yet assigned to any context
+export function inboxFilter(config: IGlobalConfig, tasks: Task[]): Task[] {
+    return tasks.filter(task => {
+        return (
+            (config.showFutureStart ||
+                !task.start ||
+                task.start <= Date.now()) && // show items depending on whether their start date has passed
+            !task.postponed &&
+            (!task.contexts || task.contexts.length === 0)
+        );
+    }); // The inbox contains (by definition) tasks not yet assigned to any context
 }
 
 export function somedayMaybeFilter(tasks: Task[]): Task[] {

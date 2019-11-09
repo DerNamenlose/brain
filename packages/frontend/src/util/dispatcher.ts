@@ -130,12 +130,6 @@ function handleTaskAction(
             newState.tasks.push(action.task);
             break;
     }
-    newState.contexts = extractContexts(newState.tasks);
-    newState.projects = extractProjects(newState.tasks);
-    newState.tags = extractTags(newState.tasks);
-    newState.inboxEmpty = inboxFilter(newState.tasks).length === 0;
-    newState.somedayMaybeEmpty =
-        somedayMaybeFilter(newState.tasks).length === 0;
     return newState;
 }
 
@@ -145,12 +139,6 @@ function handleTaskBulkAction(newState: IGlobalState, action: ITaskBulkAction) {
             newState.tasks = newState.tasks.concat(action.tasks);
             break;
     }
-    newState.contexts = extractContexts(newState.tasks);
-    newState.projects = extractProjects(newState.tasks);
-    newState.tags = extractTags(newState.tasks);
-    newState.inboxEmpty = inboxFilter(newState.tasks).length === 0;
-    newState.somedayMaybeEmpty =
-        somedayMaybeFilter(newState.tasks).length === 0;
     return newState;
 }
 
@@ -182,28 +170,50 @@ export function reduce(
         | IConfigChangeAction
         | IConfigAction
 ): IGlobalState {
-    const newState = { ...state };
+    let newState = { ...state };
     newState.tasks = [...state.tasks];
     switch (action.type) {
         case 'context':
         case 'project':
         case 'tag':
-            return handleFilterAction(newState, action as IFilterAction);
+            newState = handleFilterAction(newState, action as IFilterAction);
+            break;
         case 'task':
-            return handleTaskAction(storage, newState, action as ITaskAction);
+            newState = handleTaskAction(
+                storage,
+                newState,
+                action as ITaskAction
+            );
+            break;
         case 'bulk':
-            return handleTaskBulkAction(newState, action as ITaskBulkAction);
+            newState = handleTaskBulkAction(
+                newState,
+                action as ITaskBulkAction
+            );
+            break;
         case 'due':
-            return handleDueFilterAction(newState, action as IDueFilterAction);
+            newState = handleDueFilterAction(
+                newState,
+                action as IDueFilterAction
+            );
+            break;
         case 'config':
-            return handleConfigAction(
+            newState = handleConfigAction(
                 storage,
                 newState,
                 action as IConfigChangeAction
             );
+            break;
         case 'loadConfig':
             newState.config = action.config;
     }
+    newState.contexts = extractContexts(newState.tasks);
+    newState.projects = extractProjects(newState.tasks);
+    newState.tags = extractTags(newState.tasks);
+    newState.inboxEmpty =
+        inboxFilter(newState.config, newState.tasks).length === 0;
+    newState.somedayMaybeEmpty =
+        somedayMaybeFilter(newState.tasks).length === 0;
     return newState;
 }
 

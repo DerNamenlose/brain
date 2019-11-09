@@ -244,6 +244,27 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                             values={editedTask.tags}
                         />
                         <FormControl>
+                            Start:
+                            <input
+                                id='start'
+                                type='date'
+                                value={
+                                    (editedTask.start &&
+                                        toDateDisplay(editedTask.start)) ||
+                                    ''
+                                }
+                                onChange={ev => {
+                                    const nv = copyAndUpdate(
+                                        editedTask,
+                                        'start',
+                                        ev.target.valueAsDate &&
+                                            ev.target.valueAsDate.getTime()
+                                    );
+                                    setEditedTask(nv);
+                                }}
+                            />
+                        </FormControl>
+                        <FormControl>
                             Due:
                             <input
                                 id='due'

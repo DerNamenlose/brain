@@ -57,6 +57,24 @@ export function ConfigEditor() {
                             label='Show finished tasks'
                         />
                     </FormControl>
+                    <FormControl>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    id='showFutureStart'
+                                    checked={!!state.config.showFutureStart}
+                                    onChange={ev =>
+                                        dispatch({
+                                            type: 'config',
+                                            setting: 'showFutureStart',
+                                            value: ev.target.checked
+                                        })
+                                    }
+                                />
+                            }
+                            label='Show tasks with a start date in the future'
+                        />
+                    </FormControl>
                 </Fragment>
             )}
         </GlobalState.Consumer>

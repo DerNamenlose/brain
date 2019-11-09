@@ -20,7 +20,7 @@ export function Inbox() {
         <GlobalState.Consumer>
             {state => (
                 <Fragment>
-                    <TaskList tasks={inboxFilter(state.tasks)} />
+                    <TaskList tasks={inboxFilter(state.config, state.tasks)} />
                     <AppBar className={classes.appBar}>
                         <Toolbar></Toolbar>
                     </AppBar>
