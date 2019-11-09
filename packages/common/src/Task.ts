@@ -19,6 +19,7 @@ interface TaskBase {
     postponed?: boolean; // if an item is postponed, it's visible in the Someday/Maybe list
     version: number; // a version number indicating the relative age of the element
     hash: string; // a hash used for detecting collisions during updates
+    start?: number; // the earliest day a task is to be started
 }
 
 /**
