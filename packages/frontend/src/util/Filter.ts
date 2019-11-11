@@ -14,6 +14,13 @@ function matches(filterProperties: string[], taskProperties?: string[]) {
     );
 }
 
+export function isDueIn(task: Task, today: Date, dueIn?: number): boolean {
+    return (
+        dueIn === undefined ||
+        (!!task.due && differenceInDays(task.due, today) < dueIn)
+    );
+}
+
 export function overviewFilter(
     config: IGlobalConfig,
     tasks: Task[],
@@ -22,6 +29,11 @@ export function overviewFilter(
     selectedTags: string[],
     dueIn?: number
 ): Task[] {
+    const today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
     return tasks.filter(task => {
         return (
             !task.postponed && // postponed tasks are by definition not visible
@@ -34,8 +46,7 @@ export function overviewFilter(
             matches(selectedContexts, task.contexts) &&
             matches(selectedProjects, task.projects) &&
             matches(selectedTags, task.tags) &&
-            (dueIn === undefined ||
-                (task.due && differenceInDays(task.due, new Date()) < dueIn))
+            isDueIn(task, today, dueIn)
         );
     });
 }
