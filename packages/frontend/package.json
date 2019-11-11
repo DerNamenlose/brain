@@ -2,7 +2,7 @@
     "name": "brain",
     "version": "0.1.0",
     "private": true,
-    "homepage": "https://dernamenlose.github.io/brain/demo/",
+    "homepage": ".",
     "dependencies": {
         "@material-ui/core": "^4.5.1",
         "@material-ui/icons": "^4.5.1",
