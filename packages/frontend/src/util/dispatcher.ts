@@ -207,9 +207,18 @@ export function reduce(
         case 'loadConfig':
             newState.config = action.config;
     }
-    newState.contexts = extractContexts(newState.tasks);
-    newState.projects = extractProjects(newState.tasks);
-    newState.tags = extractTags(newState.tasks);
+    newState.contexts = extractContexts(newState.tasks, newState.config);
+    newState.projects = extractProjects(newState.tasks, newState.config);
+    newState.tags = extractTags(newState.tasks, newState.config);
+    newState.selectedContexts = newState.selectedContexts.filter(
+        sctx => !!newState.contexts.find(ctx => sctx === ctx)
+    );
+    newState.selectedProjects = newState.selectedProjects.filter(
+        sp => !!newState.projects.find(p => p === sp)
+    );
+    newState.selectedTags = newState.selectedTags.filter(
+        st => !!newState.tags.find(t => t === st)
+    );
     newState.inboxEmpty =
         inboxFilter(newState.config, newState.tasks).length === 0;
     newState.somedayMaybeEmpty =
@@ -217,21 +226,27 @@ export function reduce(
     return newState;
 }
 
-function extractContexts(tasks: Task[]): string[] {
+function extractContexts(tasks: Task[], config: IGlobalConfig): string[] {
     return sortAndUniqueString(
-        tasks.filter(task => !task.done).flatMap(task => task.contexts || [])
+        tasks
+            .filter(task => config.showDone || !task.done)
+            .flatMap(task => task.contexts || [])
     );
 }
 
-function extractProjects(tasks: Task[]): string[] {
+function extractProjects(tasks: Task[], config: IGlobalConfig): string[] {
     return sortAndUniqueString(
-        tasks.filter(task => !task.done).flatMap(task => task.projects || [])
+        tasks
+            .filter(task => config.showDone || !task.done)
+            .flatMap(task => task.projects || [])
     );
 }
 
-function extractTags(tasks: Task[]): string[] {
+function extractTags(tasks: Task[], config: IGlobalConfig): string[] {
     return sortAndUniqueString(
-        tasks.filter(task => !task.done).flatMap(task => task.tags || [])
+        tasks
+            .filter(task => config.showDone || !task.done)
+            .flatMap(task => task.tags || [])
     );
 }
 
