@@ -57,6 +57,7 @@ export function inboxFilter(config: IGlobalConfig, tasks: Task[]): Task[] {
             (config.showFutureStart ||
                 !task.start ||
                 task.start <= Date.now()) && // show items depending on whether their start date has passed
+            (config.showDone || !task.done) &&
             !task.postponed &&
             (!task.contexts || task.contexts.length === 0)
         );
