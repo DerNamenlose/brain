@@ -63,7 +63,10 @@ export class LocalStorage {
                 .get('global')) || {
                 id: 'global',
                 showDone: false,
-                showFutureStart: false
+                showFutureStart: false,
+                selectedContexts: [],
+                selectedProjects: [],
+                selectedTags: []
             }
         );
     }

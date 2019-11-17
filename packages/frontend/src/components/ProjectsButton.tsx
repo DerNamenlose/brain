@@ -13,7 +13,9 @@ export function ProjectsButton() {
                 <FilterButton
                     icon={
                         <Badge
-                            invisible={state.selectedProjects.length === 0}
+                            invisible={
+                                state.config.selectedProjects.length === 0
+                            }
                             color='secondary'
                             variant='dot'>
                             <TableChartIcon />
@@ -22,7 +24,7 @@ export function ProjectsButton() {
                     text='Projects'
                     entries={state.projects.map(project => ({
                         text: project,
-                        selected: !!state.selectedProjects.find(
+                        selected: !!state.config.selectedProjects.find(
                             p => p === project
                         )
                     }))}

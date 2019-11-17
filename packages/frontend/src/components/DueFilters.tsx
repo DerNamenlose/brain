@@ -14,7 +14,7 @@ export function DueFilters() {
                 <FilterButton
                     icon={
                         <Badge
-                            invisible={state.dueIn === undefined}
+                            invisible={state.config.dueIn === undefined}
                             color='secondary'
                             variant='dot'>
                             <WatchLaterIcon />
@@ -25,28 +25,32 @@ export function DueFilters() {
                         {
                             text: 'Overdue',
                             selected: !!(
-                                state.dueIn !== undefined && state.dueIn === 0
+                                state.config.dueIn !== undefined &&
+                                state.config.dueIn === 0
                             ),
                             value: 0
                         },
                         {
                             text: 'Today',
                             selected: !!(
-                                state.dueIn !== undefined && state.dueIn === 1
+                                state.config.dueIn !== undefined &&
+                                state.config.dueIn === 1
                             ),
                             value: 1
                         },
                         {
                             text: 'Next week',
                             selected: !!(
-                                state.dueIn !== undefined && state.dueIn === 7
+                                state.config.dueIn !== undefined &&
+                                state.config.dueIn === 7
                             ),
                             value: 7
                         },
                         {
                             text: 'Next month',
                             selected: !!(
-                                state.dueIn !== undefined && state.dueIn === 31
+                                state.config.dueIn !== undefined &&
+                                state.config.dueIn === 31
                             ),
                             value: 31
                         }
