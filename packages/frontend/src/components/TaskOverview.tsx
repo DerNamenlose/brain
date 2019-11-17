@@ -93,14 +93,7 @@ export function TaskOverview() {
                         </Toolbar>
                     </AppBar>
                     <TaskList
-                        tasks={overviewFilter(
-                            state.config,
-                            state.tasks,
-                            state.selectedContexts,
-                            state.selectedProjects,
-                            state.selectedTags,
-                            state.dueIn
-                        )}
+                        tasks={overviewFilter(state.config, state.tasks)}
                     />
                 </Fragment>
             )}

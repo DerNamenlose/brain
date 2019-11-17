@@ -44,10 +44,12 @@ const App: React.FC = () => {
         contexts: [] as string[],
         projects: [] as string[],
         tags: [] as string[],
-        selectedContexts: [] as string[],
-        selectedProjects: [] as string[],
-        selectedTags: [] as string[],
-        config: { showDone: false }
+        config: {
+            showDone: false,
+            selectedContexts: [] as string[],
+            selectedProjects: [] as string[],
+            selectedTags: [] as string[]
+        }
     } as IGlobalState);
     useEffect(() => {
         storage

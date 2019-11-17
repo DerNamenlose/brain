@@ -5,6 +5,7 @@ import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
 import { IGlobalConfig } from '../model/GlobalConfig';
+import { config } from 'react-transition-group';
 
 export interface ITaskAction {
     type: 'task';
@@ -59,13 +60,13 @@ function handleFilterAction(
     let items: string[] = [];
     switch (action.type) {
         case 'context':
-            items = [...newState.selectedContexts];
+            items = [...newState.config.selectedContexts];
             break;
         case 'project':
-            items = [...newState.selectedProjects];
+            items = [...newState.config.selectedProjects];
             break;
         case 'tag':
-            items = [...newState.selectedTags];
+            items = [...newState.config.selectedTags];
             break;
     }
     switch (action.subtype) {
@@ -82,13 +83,13 @@ function handleFilterAction(
     }
     switch (action.type) {
         case 'context':
-            newState.selectedContexts = items;
+            newState.config.selectedContexts = items;
             break;
         case 'project':
-            newState.selectedProjects = items;
+            newState.config.selectedProjects = items;
             break;
         case 'tag':
-            newState.selectedTags = items;
+            newState.config.selectedTags = items;
             break;
     }
     return newState;
@@ -147,9 +148,9 @@ function handleDueFilterAction(
     action: IDueFilterAction
 ) {
     if (action.subtype === 'deselect') {
-        newState.dueIn = undefined;
+        newState.config.dueIn = undefined;
     } else {
-        newState.dueIn = action.value;
+        newState.config.dueIn = action.value;
     }
     return newState;
 }
@@ -206,19 +207,25 @@ export function reduce(
             break;
         case 'loadConfig':
             newState.config = action.config;
+            newState.config.selectedContexts =
+                newState.config.selectedContexts || [];
+            newState.config.selectedProjects =
+                newState.config.selectedProjects || [];
+            newState.config.selectedTags = newState.config.selectedTags || [];
     }
     newState.contexts = extractContexts(newState.tasks, newState.config);
     newState.projects = extractProjects(newState.tasks, newState.config);
     newState.tags = extractTags(newState.tasks, newState.config);
-    newState.selectedContexts = newState.selectedContexts.filter(
+    newState.config.selectedContexts = newState.config.selectedContexts.filter(
         sctx => !!newState.contexts.find(ctx => sctx === ctx)
     );
-    newState.selectedProjects = newState.selectedProjects.filter(
+    newState.config.selectedProjects = newState.config.selectedProjects.filter(
         sp => !!newState.projects.find(p => p === sp)
     );
-    newState.selectedTags = newState.selectedTags.filter(
+    newState.config.selectedTags = newState.config.selectedTags.filter(
         st => !!newState.tags.find(t => t === st)
     );
+    storage.putConfig(newState.config);
     newState.inboxEmpty =
         inboxFilter(newState.config, newState.tasks).length === 0;
     newState.somedayMaybeEmpty =

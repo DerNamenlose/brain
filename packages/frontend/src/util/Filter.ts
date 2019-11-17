@@ -21,14 +21,7 @@ export function isDueIn(task: Task, today: Date, dueIn?: number): boolean {
     );
 }
 
-export function overviewFilter(
-    config: IGlobalConfig,
-    tasks: Task[],
-    selectedContexts: string[],
-    selectedProjects: string[],
-    selectedTags: string[],
-    dueIn?: number
-): Task[] {
+export function overviewFilter(config: IGlobalConfig, tasks: Task[]): Task[] {
     const today = new Date();
     today.setHours(0);
     today.setMinutes(0);
@@ -43,10 +36,10 @@ export function overviewFilter(
             (config.showFutureStart ||
                 !task.start ||
                 task.start <= Date.now()) && // show items depending on whether their start date has passed
-            matches(selectedContexts, task.contexts) &&
-            matches(selectedProjects, task.projects) &&
-            matches(selectedTags, task.tags) &&
-            isDueIn(task, today, dueIn)
+            matches(config.selectedContexts, task.contexts) &&
+            matches(config.selectedProjects, task.projects) &&
+            matches(config.selectedTags, task.tags) &&
+            isDueIn(task, today, config.dueIn)
         );
     });
 }

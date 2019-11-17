@@ -18,7 +18,9 @@ export function ContextsButton() {
                 <FilterButton
                     icon={
                         <Badge
-                            invisible={state.selectedContexts.length === 0}
+                            invisible={
+                                state.config.selectedContexts.length === 0
+                            }
                             color='secondary'
                             variant='dot'>
                             <LandscapeIcon />
@@ -27,7 +29,9 @@ export function ContextsButton() {
                     text='Contexts'
                     entries={state.contexts.map(ctx => ({
                         text: ctx,
-                        selected: !!state.selectedContexts.find(c => c === ctx)
+                        selected: !!state.config.selectedContexts.find(
+                            c => c === ctx
+                        )
                     }))}
                     onChange={selectedEntry => {
                         dispatch({

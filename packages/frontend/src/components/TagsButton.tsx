@@ -18,7 +18,7 @@ export function TagsButton() {
                 <FilterButton
                     icon={
                         <Badge
-                            invisible={state.selectedTags.length === 0}
+                            invisible={state.config.selectedTags.length === 0}
                             color='secondary'
                             variant='dot'>
                             <LocalOfferIcon />
@@ -27,7 +27,9 @@ export function TagsButton() {
                     text='Tags'
                     entries={state.tags.map(tag => ({
                         text: tag,
-                        selected: !!state.selectedTags.find(t => t === tag)
+                        selected: !!state.config.selectedTags.find(
+                            t => t === tag
+                        )
                     }))}
                     onChange={selectedEntry => {
                         dispatch({
