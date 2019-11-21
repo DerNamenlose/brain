@@ -1,13 +1,20 @@
 import { IConfig } from 'config';
 import * as express from 'express';
 import { Task } from 'brain-common';
+import { IDatabase } from './IDatabase';
 
 export class Routes {
     private _tasks = [] as Task[];
     private _config: IConfig;
+    private _database: IDatabase;
 
-    public constructor(config: IConfig, app: express.Application) {
+    public constructor(
+        config: IConfig,
+        app: express.Application,
+        database: IDatabase
+    ) {
         this._config = config;
+        this._database = database;
 
         app.route('/api').get(this.serviceRoot.bind(this));
         app.route('/api/task').get(this.getTasks.bind(this));
@@ -25,8 +32,8 @@ export class Routes {
         });
     }
 
-    private getTasks(req: express.Request, res: express.Response) {
-        res.status(200).send(this._tasks);
+    private async getTasks(req: express.Request, res: express.Response) {
+        res.status(200).send(await this._database.getAllTasks());
     }
 
     private getTask(req: express.Request, res: express.Response) {
