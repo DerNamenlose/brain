@@ -27,4 +27,8 @@ export class App {
             console.log('listening on port ' + PORT);
         });
     }
+
+    public get ExpressApp() {
+        return this._app;
+    }
 }
