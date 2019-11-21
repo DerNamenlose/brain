@@ -5,7 +5,6 @@ import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
 import { IGlobalConfig } from '../model/GlobalConfig';
-import { config } from 'react-transition-group';
 
 export interface ITaskAction {
     type: 'task';
@@ -107,8 +106,8 @@ function handleTaskAction(
             storage.create(action.task);
             break;
         case 'update':
-            const updateIdx = newState.tasks.findIndex(task =>
-                task.id.equals(action.task.id)
+            const updateIdx = newState.tasks.findIndex(
+                task => task.id === action.task.id
             );
             if (updateIdx !== -1) {
                 newState.tasks.splice(
@@ -120,8 +119,8 @@ function handleTaskAction(
             storage.update(action.task);
             break;
         case 'delete':
-            const deleteIdx = newState.tasks.findIndex(task =>
-                task.id.equals(action.task.id)
+            const deleteIdx = newState.tasks.findIndex(
+                task => task.id === action.task.id
             );
             if (deleteIdx !== -1) {
                 newState.tasks.splice(deleteIdx, 1);

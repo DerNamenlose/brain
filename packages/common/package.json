@@ -7,7 +7,5 @@
   "author": "Markus Brueckner",
   "license": "MIT",
   "private": true,
-  "dependencies": {
-    "guid-typescript": "^1.0.9"
-  }
+  "dependencies": {}
 }

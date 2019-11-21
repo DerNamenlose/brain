@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import './App.css';
 import { Task } from 'brain-common';
-import { Guid } from 'guid-typescript';
 import { TaskEditor } from './components/TaskEditor';
 import { reduce, Dispatcher } from './util/dispatcher';
 import { IGlobalState, GlobalState } from './model/GlobalState';
@@ -17,15 +16,14 @@ import { createMuiTheme } from '@material-ui/core';
 import { green, red } from '@material-ui/core/colors';
 import { ThemeProvider } from '@material-ui/styles';
 import { ConfigEditor } from './components/ConfigEditor';
+import nanoid from 'nanoid';
 
 function FindTask() {
     const { id } = useParams();
-    const taskId = id && Guid.parse(id);
     const state = useContext(GlobalState);
 
     const task: Task =
-        (taskId && state.tasks.find(t => t.id.equals(taskId))) ||
-        ({ id: Guid.create() } as Task);
+        state.tasks.find(t => t.id === id) || ({ id: nanoid() } as Task);
     return <TaskEditor task={task} />;
 }
 
@@ -77,7 +75,7 @@ const App: React.FC = () => {
                                 <Route path='/newTask'>
                                     <TaskEditor
                                         task={{
-                                            id: Guid.create(),
+                                            id: nanoid(),
                                             title: '',
                                             version: 0,
                                             hash: ''

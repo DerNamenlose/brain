@@ -1,12 +1,11 @@
-import { Guid } from 'guid-typescript';
-
 export type TaskPrio = undefined | 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 
 /**
  * Base interface of all forms of the task. Basically contains the different
  * fields, shared by all instances
  */
-interface TaskBase {
+export interface Task {
+    id: string;
     title: string;
     description?: string;
     priority?: TaskPrio;
@@ -20,20 +19,6 @@ interface TaskBase {
     version: number; // a version number indicating the relative age of the element
     hash: string; // a hash used for detecting collisions during updates
     start?: number; // the earliest day a task is to be started
-}
-
-/**
- * Interface of task objects as transported on the wire
- */
-export interface TaskDto extends TaskBase {
-    id: string;
-}
-
-/**
- * The task as stored in the IndexDB (and possibly on the backend as well)
- */
-export interface Task extends TaskBase {
-    id: Guid;
 }
 
 /**
