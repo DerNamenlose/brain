@@ -51,6 +51,6 @@
         "@types/react-router-dom": "^5.1.0",
         "@types/react-swipeable-views": "^0.13.0",
         "gh-pages": "^2.1.1",
-        "typescript": "3.6.4"
+        "typescript": "^3.7.2"
     }
 }
