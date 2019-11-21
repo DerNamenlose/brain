@@ -7,5 +7,7 @@
   "author": "Markus Brueckner",
   "license": "MIT",
   "private": true,
-  "dependencies": {}
+  "devDependencies": {
+    "typescript": "^3.7.2"
+  }
 }

@@ -1,8 +1,6 @@
 import { Task, LegacyTask } from 'brain-common';
 import { openDB, IDBPDatabase, DBSchema, IDBPTransaction } from 'idb';
-import { Guid } from 'guid-typescript';
 import hash from 'object-hash';
-import { TaskDto } from 'brain-common';
 import { IGlobalConfig } from '../model/GlobalConfig';
 
 interface TaskDBSchema extends TaskDBSchemav2Schema {
@@ -10,7 +8,7 @@ interface TaskDBSchema extends TaskDBSchemav2Schema {
 }
 
 interface TaskDBSchemav2Schema extends DBSchema {
-    tasks: { key: string; value: TaskDto };
+    tasks: { key: string; value: Task };
 }
 
 interface TaskDBv1Schema extends DBSchema {
@@ -25,10 +23,7 @@ export class LocalStorage {
             .objectStore('tasks')
             .getAll();
         console.log(`Loaded ${tasks.length} stored tasks`);
-        return tasks.map(task => ({
-            ...task,
-            id: Guid.parse(task.id)
-        }));
+        return tasks;
     }
 
     public async create(task: Task): Promise<void> {
@@ -83,7 +78,7 @@ export class LocalStorage {
             .put(storedValue);
     }
 
-    private static updateVersion(task: TaskDto): TaskDto {
+    private static updateVersion(task: Task): Task {
         const newVersion = (task.version || 0) + 1;
         return { ...task, version: newVersion, hash: hash(task) };
     }
@@ -124,7 +119,7 @@ export class LocalStorage {
             .getAll();
         oldDb.close();
         for (let object of objects) {
-            const newObject: TaskDto = {
+            const newObject: Task = {
                 ...object,
                 due: object.due && object.due.getTime(),
                 created:
