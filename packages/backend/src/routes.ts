@@ -1,7 +1,8 @@
 import { IConfig } from 'config';
 import * as express from 'express';
 import { Task } from 'brain-common';
-import { IDatabase } from './IDatabase';
+import { IDatabase } from './interfaces/IDatabase';
+import { DatabaseError, DatabaseErrorType } from './interfaces/DatabaseError';
 
 export class Routes {
     private _tasks = [] as Task[];
@@ -36,20 +37,25 @@ export class Routes {
         res.status(200).send(await this._database.getAllTasks());
     }
 
-    private getTask(req: express.Request, res: express.Response) {
-        res.status(200).send('Hi');
+    private async getTask(req: express.Request, res: express.Response) {
+        const task = await this._database.getById(req.params['id']);
+        if (!!task) {
+            res.status(200).send(task);
+        } else {
+            res.status(404).send();
+        }
     }
 
-    private saveTask(req: express.Request, res: express.Response) {
-        const taskIndex = this._tasks.findIndex(
-            task => req.params['id'] === task.id
-        );
+    private async saveTask(req: express.Request, res: express.Response) {
         const storedObject = { ...req.body, id: req.params['id'] };
-        if (taskIndex === -1) {
-            this._tasks.push(storedObject);
-        } else {
-            this._tasks = this._tasks.splice(taskIndex, 1, storedObject);
+        const storageResult = await this._database.createTask(storedObject);
+        const error = storageResult as DatabaseError;
+        if (error) {
+            if (error.type === DatabaseErrorType.Conflict) {
+                res.status(409).send();
+            } else {
+                res.status(500);
+            }
         }
-        res.status(204).send();
     }
 }

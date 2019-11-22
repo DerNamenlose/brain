@@ -1,4 +1,5 @@
 import { Task } from 'brain-common';
+import { DatabaseError } from './DatabaseError';
 
 /**
  * Interface implemented by all databases
@@ -11,5 +12,5 @@ export interface IDatabase {
      */
     getById(id: string): Promise<Task | undefined>;
 
-    createTask(task: Task): Promise<Task | IDatabaseError>;
+    createTask(task: Task): Promise<Task | DatabaseError>;
 }

@@ -2,7 +2,7 @@ import * as express from 'express';
 import { IConfig } from 'config';
 import { Routes } from './routes';
 import bodyParser = require('body-parser');
-import { IDatabase } from './IDatabase';
+import { IDatabase } from './interfaces/IDatabase';
 
 export class App {
     private _app: express.Application;
