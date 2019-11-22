@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import * as hash from 'object-hash';
 import { Task } from '.';
 
 export function calculateVersionHash(task: Task): string {

@@ -9,5 +9,8 @@
   "private": true,
   "devDependencies": {
     "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "object-hash": "^2.0.0"
   }
 }

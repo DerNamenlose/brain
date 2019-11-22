@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import * as express from 'express';
-import { Task } from 'brain-common';
+import { Task, calculateVersionHash } from 'brain-common';
 import { IDatabase } from './interfaces/IDatabase';
 import { DatabaseError, DatabaseErrorType } from './interfaces/DatabaseError';
 
@@ -47,22 +47,31 @@ export class Routes {
     }
 
     private async saveTask(req: express.Request, res: express.Response) {
-        const newTask = { ...req.body, id: req.params['id'] } as Task;
+        const newTask = {
+            ...req.body,
+            id: req.params['id'],
+            hash: calculateVersionHash(req.body)
+        } as Task;
         if (!Routes.isValid(newTask)) {
             res.status(400).send({ message: 'Missing required field' });
-        } else {
-            const storedTask = await this._database.getById(req.params['id']);
-            if (!Routes.isValidNextVersion(storedTask, newTask)) {
-                res.status(409).send();
-            }
-            const storageResult = await this._database.createTask(newTask);
-            const error = storageResult as DatabaseError;
-            if (error) {
-                res.status(500).send();
-            } else {
-                res.status(204).send();
-            }
+            return;
         }
+        const storedTask = await this._database.getById(req.params['id']);
+        if (Routes.isSameVersion(storedTask, newTask)) {
+            res.status(204).send();
+            return;
+        }
+        if (!Routes.isValidNextVersion(storedTask, newTask)) {
+            res.status(409).send();
+            return;
+        }
+        const storageResult = await this._database.createTask(newTask);
+        const error = storageResult as DatabaseError;
+        if (error) {
+            res.status(500).send();
+            return;
+        }
+        res.status(204).send();
     }
 
     private static isValid(task: Task): boolean {
@@ -73,6 +82,14 @@ export class Routes {
         return (
             (!stored && candidate.version === 1) ||
             (stored && candidate.version - stored.version === 1)
+        );
+    }
+
+    private static isSameVersion(stored: Task, candidate: Task): boolean {
+        return (
+            stored &&
+            stored.version === candidate.version &&
+            stored.hash === candidate.hash
         );
     }
 }
