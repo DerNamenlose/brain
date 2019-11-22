@@ -47,14 +47,24 @@ export class Routes {
     }
 
     private async saveTask(req: express.Request, res: express.Response) {
-        const storedObject = { ...req.body, id: req.params['id'] };
-        const storageResult = await this._database.createTask(storedObject);
-        const error = storageResult as DatabaseError;
-        if (error) {
-            if (error.type === DatabaseErrorType.Conflict) {
-                res.status(409).send();
+        const storedObject = { ...req.body, id: req.params['id'] } as Task;
+        if (
+            !storedObject.title ||
+            !storedObject.version ||
+            !storedObject.hash
+        ) {
+            res.status(400).send({ message: 'Missing required field' });
+        } else {
+            const storageResult = await this._database.createTask(storedObject);
+            const error = storageResult as DatabaseError;
+            if (error) {
+                if (error.type === DatabaseErrorType.Conflict) {
+                    res.status(409).send();
+                } else {
+                    res.status(500).send();
+                }
             } else {
-                res.status(500);
+                res.status(204).send();
             }
         }
     }

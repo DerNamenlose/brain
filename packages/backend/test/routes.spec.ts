@@ -76,4 +76,15 @@ describe('tasks api', () => {
             });
         expect(response.status).to.equal(409);
     });
+
+    it('should refuse tasks without versions', async () => {
+        const app = new App(config, db);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/invalid_task')
+            .send({
+                id: 'task1',
+                title: 'Test title'
+            });
+        expect(response.status).to.equal(400);
+    });
 });
