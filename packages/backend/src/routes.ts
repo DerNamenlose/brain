@@ -47,25 +47,32 @@ export class Routes {
     }
 
     private async saveTask(req: express.Request, res: express.Response) {
-        const storedObject = { ...req.body, id: req.params['id'] } as Task;
-        if (
-            !storedObject.title ||
-            !storedObject.version ||
-            !storedObject.hash
-        ) {
+        const newTask = { ...req.body, id: req.params['id'] } as Task;
+        if (!Routes.isValid(newTask)) {
             res.status(400).send({ message: 'Missing required field' });
         } else {
-            const storageResult = await this._database.createTask(storedObject);
+            const storedTask = await this._database.getById(req.params['id']);
+            if (!Routes.isValidNextVersion(storedTask, newTask)) {
+                res.status(409).send();
+            }
+            const storageResult = await this._database.createTask(newTask);
             const error = storageResult as DatabaseError;
             if (error) {
-                if (error.type === DatabaseErrorType.Conflict) {
-                    res.status(409).send();
-                } else {
-                    res.status(500).send();
-                }
+                res.status(500).send();
             } else {
                 res.status(204).send();
             }
         }
+    }
+
+    private static isValid(task: Task): boolean {
+        return !!task.title && !!task.version && !!task.hash;
+    }
+
+    private static isValidNextVersion(stored: Task, candidate: Task): boolean {
+        return (
+            (!stored && candidate.version === 1) ||
+            (stored && candidate.version - stored.version === 1)
+        );
     }
 }

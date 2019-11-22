@@ -26,7 +26,9 @@ describe('tasks api', () => {
     let tasks = [
         {
             id: 'task1',
-            title: 'Just a task'
+            title: 'Just a task',
+            version: 2,
+            hash: 'some hash'
         } as Task,
         {
             id: 'task2',
@@ -72,7 +74,10 @@ describe('tasks api', () => {
         const response = await request(app.ExpressApp)
             .put('/api/task/task1')
             .send({
-                id: 'task1'
+                id: 'task1',
+                title: 'New title',
+                version: 1,
+                hash: 'Some hash'
             });
         expect(response.status).to.equal(409);
     });
@@ -82,9 +87,22 @@ describe('tasks api', () => {
         const response = await request(app.ExpressApp)
             .put('/api/task/invalid_task')
             .send({
-                id: 'task1',
+                id: 'invalid_task',
                 title: 'Test title'
             });
         expect(response.status).to.equal(400);
+    });
+
+    it('should refuse tasks with an older version, than stored', async () => {
+        const app = new App(config, db);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/task2')
+            .send({
+                id: 'task2',
+                title: 'Test title',
+                version: 1,
+                hash: 'new hash'
+            });
+        expect(response.status).to.equal(409);
     });
 });
