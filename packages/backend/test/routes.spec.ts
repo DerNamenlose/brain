@@ -113,4 +113,28 @@ describe('tasks api', () => {
             .send(tasks[1]);
         expect(response.status).to.equal(204);
     });
+
+    it('should refuse tasks with the same version, but a different hash', async () => {
+        const app = new App(config, db);
+        const newTask = { ...tasks[1], title: 'Some new title' };
+        const response = await request(app.ExpressApp)
+            .put('/api/task/task2')
+            .send(newTask);
+        expect(response.status).to.equal(409);
+    });
+
+    it('should return the existing version on conflict', async () => {
+        const app = new App(config, db);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/task2')
+            .send({
+                id: 'task2',
+                title: 'Test title',
+                version: 1,
+                hash: 'new hash'
+            });
+        expect(response.status).to.equal(409);
+        const existing = response.body as Task;
+        expect(existing).to.eql(tasks[1]);
+    });
 });

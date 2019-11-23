@@ -62,7 +62,7 @@ export class Routes {
             return;
         }
         if (!Routes.isValidNextVersion(storedTask, newTask)) {
-            res.status(409).send();
+            res.status(409).send(storedTask);
             return;
         }
         const storageResult = await this._database.createTask(newTask);
