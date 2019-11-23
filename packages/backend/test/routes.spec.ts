@@ -3,7 +3,8 @@ import * as config from 'config';
 import * as request from 'supertest';
 import {
     DatabaseError,
-    DatabaseErrorType
+    DatabaseErrorType,
+    DatabaseObject
 } from '../src/interfaces/DatabaseError';
 import { expect } from 'chai';
 import { Task, calculateVersionHash } from 'brain-common';
@@ -43,12 +44,20 @@ describe('tasks api', () => {
             return tasks;
         },
         async getById(id: string) {
-            return tasks.find(t => t.id === id);
-        },
-        async createTask(task: Task) {
-            if (tasks.find(t => t.id === task.id)) {
-                return new DatabaseError(DatabaseErrorType.Conflict);
+            const task = tasks.find(t => t.id === id);
+            if (!task) {
+                return new DatabaseError(DatabaseErrorType.NotFound);
             }
+            return new DatabaseObject(task);
+        },
+        async saveTask(task: Task) {
+            const existing = tasks.findIndex(t => t.id === task.id);
+            if (existing === -1) {
+                tasks.push(task);
+            } else {
+                tasks.splice(existing, 1, task);
+            }
+            return new DatabaseObject(tasks[existing]);
         }
     };
     it('should list all available tasks', async () => {
@@ -136,5 +145,46 @@ describe('tasks api', () => {
         expect(response.status).to.equal(409);
         const existing = response.body as Task;
         expect(existing).to.eql(tasks[1]);
+    });
+
+    it('should store a new task and retrieve it later', async () => {
+        const app = new App(config, db);
+        const task: Task = {
+            id: 'newtask',
+            title: 'Test title',
+            version: 1,
+            hash: ''
+        };
+        task.hash = calculateVersionHash(task);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/newtask')
+            .send(task);
+        expect(response.status).to.equal(204);
+        const getResponse = await request(app.ExpressApp).get(
+            '/api/task/newtask'
+        );
+        expect(getResponse.status).to.equal(200);
+        const retrieved: Task = getResponse.body;
+        expect(retrieved).to.eql(task);
+    });
+
+    it('should store an updated task and retrieve it later', async () => {
+        const app = new App(config, db);
+        const task: Task = {
+            ...tasks[0],
+            title: 'Changed title',
+            version: tasks[0].version + 1
+        };
+        task.hash = calculateVersionHash(task);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/task1')
+            .send(task);
+        expect(response.status).to.equal(204);
+        const getResponse = await request(app.ExpressApp).get(
+            '/api/task/task1'
+        );
+        expect(getResponse.status).to.equal(200);
+        const retrieved: Task = getResponse.body;
+        expect(retrieved).to.eql(task);
     });
 });

@@ -1,5 +1,5 @@
 import { Task } from 'brain-common';
-import { DatabaseError } from './DatabaseError';
+import { IDatabaseResult } from './DatabaseError';
 
 /**
  * Interface implemented by all databases
@@ -10,7 +10,7 @@ export interface IDatabase {
      * Get a specific task by its id.
      * @param id The id of the task to look up
      */
-    getById(id: string): Promise<Task | undefined>;
+    getById(id: string): Promise<IDatabaseResult>;
 
-    createTask(task: Task): Promise<Task | DatabaseError>;
+    saveTask(task: Task): Promise<IDatabaseResult>;
 }

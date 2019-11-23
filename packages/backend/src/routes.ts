@@ -2,7 +2,11 @@ import { IConfig } from 'config';
 import * as express from 'express';
 import { Task, calculateVersionHash } from 'brain-common';
 import { IDatabase } from './interfaces/IDatabase';
-import { DatabaseError, DatabaseErrorType } from './interfaces/DatabaseError';
+import {
+    DatabaseError,
+    DatabaseErrorType,
+    DatabaseObject
+} from './interfaces/DatabaseError';
 
 export class Routes {
     private _tasks = [] as Task[];
@@ -38,9 +42,9 @@ export class Routes {
     }
 
     private async getTask(req: express.Request, res: express.Response) {
-        const task = await this._database.getById(req.params['id']);
-        if (!!task) {
-            res.status(200).send(task);
+        const result = await this._database.getById(req.params['id']);
+        if (!result.isError) {
+            res.status(200).send((result as DatabaseObject<Task>).value);
         } else {
             res.status(404).send();
         }
@@ -56,18 +60,23 @@ export class Routes {
             res.status(400).send({ message: 'Missing required field' });
             return;
         }
-        const storedTask = await this._database.getById(req.params['id']);
-        if (Routes.isSameVersion(storedTask, newTask)) {
+        const result = await this._database.getById(req.params['id']);
+        const storedObject: Task = result.isError
+            ? undefined
+            : (result as DatabaseObject<Task>).value;
+        if (!result.isError && Routes.isSameVersion(storedObject, newTask)) {
             res.status(204).send();
             return;
         }
-        if (!Routes.isValidNextVersion(storedTask, newTask)) {
-            res.status(409).send(storedTask);
+        if (
+            !result.isError &&
+            !Routes.isValidNextVersion(storedObject, newTask)
+        ) {
+            res.status(409).send(storedObject);
             return;
         }
-        const storageResult = await this._database.createTask(newTask);
-        const error = storageResult as DatabaseError;
-        if (error) {
+        const storageResult = await this._database.saveTask(newTask);
+        if (storageResult.isError) {
             res.status(500).send();
             return;
         }
