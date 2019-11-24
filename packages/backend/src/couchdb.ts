@@ -66,10 +66,17 @@ export class CouchDB implements IDatabase {
         const { id, ...dto } = task;
         try {
             const db = this._server.db.use(this._dbName);
-            await db.insert({
+            const newVersion = {
                 _id: `t${id}`,
                 ...dto
-            });
+            } as TaskDbo;
+            try {
+                const existing = await db.get(`t${id}`);
+                newVersion._rev = existing._rev;
+            } catch (e) {
+                // ignore on purpose. This most likely means, that the document doesn't exist yet.
+            }
+            await db.insert(newVersion);
             return new DatabaseObject(task);
         } catch (e) {
             return new DatabaseError(DatabaseErrorType.Conflict);

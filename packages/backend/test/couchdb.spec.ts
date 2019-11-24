@@ -106,4 +106,32 @@ describe('CouchDB backend', () => {
             hash: 'dfdsafgsdfgs'
         });
     });
+
+    it('should overwrite tasks correctly', async () => {
+        const original = {
+            _id: 't1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task',
+            version: 1,
+            hash: 'dfdsafgsdfgs'
+        };
+        const directDb = directServer.db.use(dbName);
+        await directDb.insert(original);
+        const task = {
+            id: '1234567890',
+            title: 'Test1 new',
+            description: 'Something new',
+            owner: 'owner',
+            type: 'task',
+            version: 2,
+            hash: 'efsdjhfksd'
+        };
+        const result = await db.saveTask(task);
+        expect(result.isError).to.be.false;
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).to.be.false;
+        expect((retrieved as DatabaseObject<Task>).value).to.eql(task);
+    });
 });
