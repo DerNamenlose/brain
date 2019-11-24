@@ -153,7 +153,8 @@ describe('tasks api', () => {
             id: 'newtask',
             title: 'Test title',
             version: 1,
-            hash: ''
+            hash: '',
+            owner: ''
         };
         task.hash = calculateVersionHash(task);
         const response = await request(app.ExpressApp)

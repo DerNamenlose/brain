@@ -19,6 +19,8 @@ export interface Task {
     version: number; // a version number indicating the relative age of the element
     hash: string; // a hash used for detecting collisions during updates
     start?: number; // the earliest day a task is to be started
+    owner: string; // the owner of this task
+    access?: string[]; // names of users, that have access to the task
 }
 
 /**
