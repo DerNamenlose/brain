@@ -81,4 +81,29 @@ describe('CouchDB backend', () => {
         const dbObject = retrieved as DatabaseObject<Task>;
         expect(dbObject.value).to.eql(task);
     });
+
+    it('should store tasks correctly', async () => {
+        const task = {
+            id: '1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task',
+            version: 1,
+            hash: 'dfdsafgsdfgs'
+        };
+        await db.saveTask(task);
+        const directDb = directServer.db.use(dbName);
+        const dbResult = await directDb.get(`t${task.id}`);
+        const { _rev, ...dbo } = dbResult;
+        expect(dbo as TaskDbo).to.eql({
+            _id: 't1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task',
+            version: 1,
+            hash: 'dfdsafgsdfgs'
+        });
+    });
 });

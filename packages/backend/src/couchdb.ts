@@ -62,8 +62,18 @@ export class CouchDB implements IDatabase {
         }
     }
 
-    saveTask(task: Task): Promise<IDatabaseResult> {
-        throw new Error('Method not implemented.');
+    async saveTask(task: Task): Promise<IDatabaseResult> {
+        const { id, ...dto } = task;
+        try {
+            const db = this._server.db.use(this._dbName);
+            await db.insert({
+                _id: `t${id}`,
+                ...dto
+            });
+            return new DatabaseObject(task);
+        } catch (e) {
+            return new DatabaseError(DatabaseErrorType.Conflict);
+        }
     }
 
     async checkAndUpdate() {
