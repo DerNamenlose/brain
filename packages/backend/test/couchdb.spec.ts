@@ -1,6 +1,8 @@
 import { CouchDB, DesignDoc, TaskDbo } from '../src/couchdb';
 import * as nano from 'nano';
 import { expect } from 'chai';
+import { DatabaseObject } from '../src/interfaces/DatabaseError';
+import { Task } from 'brain-common';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -59,5 +61,24 @@ describe('CouchDB backend', () => {
         });
         const retrieved = await db.getAllTasks();
         expect(retrieved).to.eql(tasks);
+    });
+
+    it('should retrieve individual tasks', async () => {
+        const task = {
+            id: '1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task',
+            version: 1,
+            hash: 'dfdsafgsdfgs'
+        };
+        const directDb = directServer.db.use(dbName);
+        const { id, ...dbo } = task;
+        await directDb.insert({ _id: `t${task.id}`, ...dbo });
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).to.be.false;
+        const dbObject = retrieved as DatabaseObject<Task>;
+        expect(dbObject.value).to.eql(task);
     });
 });

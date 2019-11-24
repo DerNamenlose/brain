@@ -1,6 +1,11 @@
 import { IDatabase } from './interfaces/IDatabase';
 import { Task } from 'brain-common';
-import { IDatabaseResult } from './interfaces/DatabaseError';
+import {
+    IDatabaseResult,
+    DatabaseObject,
+    DatabaseError,
+    DatabaseErrorType
+} from './interfaces/DatabaseError';
 import * as nano from 'nano';
 
 export const DesignDoc = {
@@ -24,6 +29,7 @@ export const DesignDoc = {
 
 export interface TaskDbo extends Task {
     _id: string;
+    _rev: string;
     type: 'task';
 }
 
@@ -37,17 +43,23 @@ export class CouchDB implements IDatabase {
         this._dbName = db;
         this._server = nano(this._url);
     }
+
     async getAllTasks(): Promise<Task[]> {
         const db = this._server.use(this._dbName);
-        const tasks = await db.view('tasks', 'available');
-        return tasks.rows.map(entry => {
-            const { _id, _rev, ...task } = entry.value as any;
-            return { id: _id.substring(1), ...task } as Task;
-        });
+        const dbResult = await db.view('tasks', 'available');
+        return dbResult.rows.map(entry =>
+            CouchDB.toTask(entry.value as TaskDbo)
+        );
     }
 
-    getById(id: string): Promise<IDatabaseResult> {
-        throw new Error('Method not implemented.');
+    async getById(id: string): Promise<IDatabaseResult> {
+        const db = this._server.use(this._dbName);
+        try {
+            const dbResult = await db.get(`t${id}`);
+            return new DatabaseObject(CouchDB.toTask(dbResult as TaskDbo));
+        } catch (e) {
+            return new DatabaseError(DatabaseErrorType.NotFound);
+        }
     }
 
     saveTask(task: Task): Promise<IDatabaseResult> {
@@ -62,5 +74,10 @@ export class CouchDB implements IDatabase {
         } catch (e) {
             console.log(e);
         }
+    }
+
+    private static toTask(dbo: TaskDbo): Task {
+        const { _id, _rev, ...task } = dbo;
+        return { id: _id.substring(1), ...task } as Task;
     }
 }
