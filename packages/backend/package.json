@@ -28,6 +28,7 @@
         "mocha": "^6.2.2",
         "supertest": "^4.0.2",
         "ts-node-dev": "^1.0.0-pre.43",
-        "typescript": "^3.6.4"
+        "typescript": "^3.7.2",
+        "webpack-cli": "^3.3.10"
     }
 }
