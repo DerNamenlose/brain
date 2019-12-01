@@ -84,52 +84,38 @@ describe('tasks api', () => {
             .put('/api/task/task1')
             .send({
                 id: 'task1',
-                title: 'New title',
-                version: 1,
-                hash: 'Some hash'
+                title: 'New title'
             });
         expect(response.status).to.equal(409);
     });
 
-    it('should refuse tasks without versions', async () => {
+    it('should return a conflict when an update is based on an outdated version', async () => {
         const app = new App(config, db);
         const response = await request(app.ExpressApp)
             .put('/api/task/invalid_task')
             .send({
                 id: 'invalid_task',
-                title: 'Test title'
+                title: 'Test title',
+                hash: 'some random old hash'
             });
-        expect(response.status).to.equal(400);
+        expect(response.status).to.equal(409);
     });
 
-    it('should refuse tasks with an older version, than stored', async () => {
+    it('should accept subsequent updates based on the latest version', async () => {
         const app = new App(config, db);
-        const response = await request(app.ExpressApp)
+        const firstUpdate = await request(app.ExpressApp)
             .put('/api/task/task2')
             .send({
-                id: 'task2',
-                title: 'Test title',
-                version: 1,
-                hash: 'new hash'
+                ...tasks[1],
+                title: 'New title'
             });
-        expect(response.status).to.equal(409);
-    });
-
-    it('should silently acknowledge writes with the same version and hash', async () => {
-        const app = new App(config, db);
-        const response = await request(app.ExpressApp)
+        expect(firstUpdate.status).to.equal(200);
+        const newState = firstUpdate.body as Task;
+        newState.title = 'And another update';
+        const secondUpdate = await request(app.ExpressApp)
             .put('/api/task/task2')
-            .send(tasks[1]);
-        expect(response.status).to.equal(204);
-    });
-
-    it('should refuse tasks with the same version, but a different hash', async () => {
-        const app = new App(config, db);
-        const newTask = { ...tasks[1], title: 'Some new title' };
-        const response = await request(app.ExpressApp)
-            .put('/api/task/task2')
-            .send(newTask);
-        expect(response.status).to.equal(409);
+            .send(newState);
+        expect(secondUpdate.status).to.equal(200);
     });
 
     it('should return the existing version on conflict', async () => {
@@ -139,8 +125,7 @@ describe('tasks api', () => {
             .send({
                 id: 'task2',
                 title: 'Test title',
-                version: 1,
-                hash: 'new hash'
+                hash: 'wrong hash'
             });
         expect(response.status).to.equal(409);
         const existing = response.body as Task;
@@ -152,15 +137,12 @@ describe('tasks api', () => {
         const task: Task = {
             id: 'newtask',
             title: 'Test title',
-            version: 1,
-            hash: '',
             owner: ''
         };
-        task.hash = calculateVersionHash(task);
         const response = await request(app.ExpressApp)
             .put('/api/task/newtask')
             .send(task);
-        expect(response.status).to.equal(204);
+        expect(response.status).to.equal(200);
         const getResponse = await request(app.ExpressApp).get(
             '/api/task/newtask'
         );
@@ -173,14 +155,12 @@ describe('tasks api', () => {
         const app = new App(config, db);
         const task: Task = {
             ...tasks[0],
-            title: 'Changed title',
-            version: tasks[0].version + 1
+            title: 'Changed title'
         };
-        task.hash = calculateVersionHash(task);
         const response = await request(app.ExpressApp)
             .put('/api/task/task1')
             .send(task);
-        expect(response.status).to.equal(204);
+        expect(response.status).to.equal(200);
         const getResponse = await request(app.ExpressApp).get(
             '/api/task/task1'
         );

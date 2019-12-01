@@ -38,18 +38,14 @@ describe('CouchDB backend', () => {
                 title: 'Test1',
                 description: 'Something',
                 owner: 'owner',
-                type: 'task',
-                version: 1,
-                hash: 'dfdsafgsdfgs'
+                type: 'task'
             },
             {
                 id: '9876543210',
                 title: 'Test2',
                 contexts: ['c1', 'c2'],
                 owner: 'owner',
-                type: 'task',
-                version: 1,
-                hash: 'adsafsdfaasd'
+                type: 'task'
             }
         ];
         const directDb = directServer.db.use(dbName);
@@ -69,9 +65,7 @@ describe('CouchDB backend', () => {
             title: 'Test1',
             description: 'Something',
             owner: 'owner',
-            type: 'task',
-            version: 1,
-            hash: 'dfdsafgsdfgs'
+            type: 'task'
         };
         const directDb = directServer.db.use(dbName);
         const { id, ...dbo } = task;
@@ -88,9 +82,7 @@ describe('CouchDB backend', () => {
             title: 'Test1',
             description: 'Something',
             owner: 'owner',
-            type: 'task',
-            version: 1,
-            hash: 'dfdsafgsdfgs'
+            type: 'task'
         };
         await db.saveTask(task);
         const directDb = directServer.db.use(dbName);
@@ -101,9 +93,7 @@ describe('CouchDB backend', () => {
             title: 'Test1',
             description: 'Something',
             owner: 'owner',
-            type: 'task',
-            version: 1,
-            hash: 'dfdsafgsdfgs'
+            type: 'task'
         });
     });
 
@@ -113,9 +103,7 @@ describe('CouchDB backend', () => {
             title: 'Test1',
             description: 'Something',
             owner: 'owner',
-            type: 'task',
-            version: 1,
-            hash: 'dfdsafgsdfgs'
+            type: 'task'
         };
         const directDb = directServer.db.use(dbName);
         await directDb.insert(original);
@@ -124,14 +112,28 @@ describe('CouchDB backend', () => {
             title: 'Test1 new',
             description: 'Something new',
             owner: 'owner',
-            type: 'task',
-            version: 2,
-            hash: 'efsdjhfksd'
+            type: 'task'
         };
         const result = await db.saveTask(task);
         expect(result.isError).to.be.false;
         const retrieved = await db.getById('1234567890');
         expect(retrieved.isError).to.be.false;
         expect((retrieved as DatabaseObject<Task>).value).to.eql(task);
+    });
+
+    it('should update the version hash on write', async () => {
+        const original = {
+            _id: 't1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task'
+        };
+        const directDb = directServer.db.use(dbName);
+        await directDb.insert(original);
+        const taskResult = await db.getById('1234567890');
+        expect(taskResult.isError).to.be.false;
+        expect((taskResult as DatabaseObject<Task>).value.hash).to.not.be
+            .undefined;
     });
 });

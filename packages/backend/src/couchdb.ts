@@ -52,34 +52,35 @@ export class CouchDB implements IDatabase {
         );
     }
 
-    async getById(id: string): Promise<IDatabaseResult> {
+    async getById(id: string): Promise<IDatabaseResult<Task>> {
         const db = this._server.use(this._dbName);
         try {
             const dbResult = await db.get(`t${id}`);
             return new DatabaseObject(CouchDB.toTask(dbResult as TaskDbo));
         } catch (e) {
-            return new DatabaseError(DatabaseErrorType.NotFound);
+            return new DatabaseError<Task>(DatabaseErrorType.NotFound);
         }
     }
 
-    async saveTask(task: Task): Promise<IDatabaseResult> {
+    async saveTask(task: Task): Promise<IDatabaseResult<Task>> {
         const { id, ...dto } = task;
+        const db = this._server.db.use(this._dbName);
         try {
-            const db = this._server.db.use(this._dbName);
             const newVersion = {
-                _id: `t${id}`,
+                _id: `t${id}`
                 ...dto
             } as TaskDbo;
-            try {
-                const existing = await db.get(`t${id}`);
-                newVersion._rev = existing._rev;
-            } catch (e) {
-                // ignore on purpose. This most likely means, that the document doesn't exist yet.
+            if (!!dto.hash) {
+                newVersion._rev = dto.hash;
             }
             await db.insert(newVersion);
             return new DatabaseObject(task);
         } catch (e) {
-            return new DatabaseError(DatabaseErrorType.Conflict);
+            const existing = await this.getById(id);
+            if (existing.isError) {
+                return new DatabaseError<Task>(DatabaseErrorType.Internal);
+            }
+            return new DatabaseError(DatabaseErrorType.Conflict, existing.value);
         }
     }
 
@@ -95,6 +96,6 @@ export class CouchDB implements IDatabase {
 
     private static toTask(dbo: TaskDbo): Task {
         const { _id, _rev, ...task } = dbo;
-        return { id: _id.substring(1), ...task } as Task;
+        return { id: _id.substring(1), hash: _rev, ...task } as Task;
     }
 }

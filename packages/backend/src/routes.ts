@@ -2,14 +2,9 @@ import { IConfig } from 'config';
 import * as express from 'express';
 import { Task, calculateVersionHash } from 'brain-common';
 import { IDatabase } from './interfaces/IDatabase';
-import {
-    DatabaseError,
-    DatabaseErrorType,
-    DatabaseObject
-} from './interfaces/DatabaseError';
+import { DatabaseObject } from './interfaces/DatabaseError';
 
 export class Routes {
-    private _tasks = [] as Task[];
     private _config: IConfig;
     private _database: IDatabase;
 
@@ -51,12 +46,11 @@ export class Routes {
     }
 
     private async saveTask(req: express.Request, res: express.Response) {
-        const newTask = {
+        const update = {
             ...req.body,
-            id: req.params['id'],
-            hash: calculateVersionHash(req.body)
+            id: req.params['id']
         } as Task;
-        if (!Routes.isValid(newTask)) {
+        if (!Routes.isValid(update)) {
             res.status(400).send({ message: 'Missing required field' });
             return;
         }
@@ -64,41 +58,19 @@ export class Routes {
         const storedObject: Task = result.isError
             ? undefined
             : (result as DatabaseObject<Task>).value;
-        if (!result.isError && Routes.isSameVersion(storedObject, newTask)) {
-            res.status(204).send();
-            return;
+
+        if (storedObject?.hash === update.hash) {
+            const storageResult = await this._database.saveTask(update);
+            if (storageResult.isError) {
+                res.status(500).send();
+                return;
+            }
+            res.status(200).send((storageResult as DatabaseObject<Task>).value);
         }
-        if (
-            !result.isError &&
-            !Routes.isValidNextVersion(storedObject, newTask)
-        ) {
-            res.status(409).send(storedObject);
-            return;
-        }
-        const storageResult = await this._database.saveTask(newTask);
-        if (storageResult.isError) {
-            res.status(500).send();
-            return;
-        }
-        res.status(204).send();
+        res.status(409).send(storedObject);
     }
 
     private static isValid(task: Task): boolean {
-        return !!task.title && !!task.version && !!task.hash;
-    }
-
-    private static isValidNextVersion(stored: Task, candidate: Task): boolean {
-        return (
-            (!stored && candidate.version === 1) ||
-            (stored && candidate.version - stored.version === 1)
-        );
-    }
-
-    private static isSameVersion(stored: Task, candidate: Task): boolean {
-        return (
-            stored &&
-            stored.version === candidate.version &&
-            stored.hash === candidate.hash
-        );
+        return !!task.title;
     }
 }

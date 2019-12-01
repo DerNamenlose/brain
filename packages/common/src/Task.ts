@@ -16,8 +16,8 @@ export interface Task {
     projects?: string[];
     tags?: string[];
     postponed?: boolean; // if an item is postponed, it's visible in the Someday/Maybe list
-    version: number; // a version number indicating the relative age of the element
-    hash: string; // a hash used for detecting collisions during updates
+    version?: number; // legacy version number
+    hash?: string; // a hash used for detecting collisions during updates
     start?: number; // the earliest day a task is to be started
     owner: string; // the owner of this task
     access?: string[]; // names of users, that have access to the task
