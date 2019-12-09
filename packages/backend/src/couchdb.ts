@@ -1,5 +1,13 @@
 import { IDatabase } from './interfaces/IDatabase';
-import { Task } from 'brain-common';
+import {
+    Task,
+    TaskEventDto,
+    IEvent,
+    IEventDto,
+    CreateEvent,
+    UpdateEvent,
+    DeleteEvent
+} from 'brain-common';
 import {
     IDatabaseResult,
     DatabaseObject,
@@ -21,17 +29,38 @@ export const DesignDoc = {
                         emit(otherUser, doc)
                       })
                     }
-                } 
+                }
               }`
+        },
+        events: {
+            map: `function(doc) {
+                if (doc.type == 'event')
+                {
+                    emit(doc.streamId, doc);
+                } 
+            }`
         }
     }
 };
 
-export interface TaskDbo extends Task {
+interface TaskDbo extends Task {
     _id: string;
     _rev: string;
     type: 'task';
 }
+
+interface IEventDbo extends IEvent {
+    _id: string;
+    _rev?: string;
+    type: 'event';
+    streamId: string;
+}
+
+type CreateEventDbo = CreateEvent & IEventDbo;
+type UpdateEventDbo = UpdateEvent & IEventDbo;
+type DeleteEventDbo = DeleteEvent & IEventDbo;
+
+type EventDbo = CreateEventDbo | UpdateEventDbo | DeleteEventDbo;
 
 export class CouchDB implements IDatabase {
     private _url: string;
@@ -45,7 +74,7 @@ export class CouchDB implements IDatabase {
     }
 
     async getAllTasks(): Promise<Task[]> {
-        const db = this._server.use(this._dbName);
+        const db = this._server.db.use(this._dbName);
         const dbResult = await db.view('tasks', 'available');
         return dbResult.rows.map(entry =>
             CouchDB.toTask(entry.value as TaskDbo)
@@ -53,7 +82,7 @@ export class CouchDB implements IDatabase {
     }
 
     async getById(id: string): Promise<IDatabaseResult<Task>> {
-        const db = this._server.use(this._dbName);
+        const db = this._server.db.use(this._dbName);
         try {
             const dbResult = await db.get(`t${id}`);
             return new DatabaseObject(CouchDB.toTask(dbResult as TaskDbo));
@@ -62,40 +91,73 @@ export class CouchDB implements IDatabase {
         }
     }
 
-    async saveTask(task: Task): Promise<IDatabaseResult<Task>> {
-        const { id, ...dto } = task;
+    async handleEvents(
+        id: string,
+        events: TaskEventDto[]
+    ): Promise<IDatabaseResult<Task>> {
         const db = this._server.db.use(this._dbName);
         try {
-            const newVersion = {
-                _id: `t${id}`
-                ...dto
-            } as TaskDbo;
-            if (!!dto.hash) {
-                newVersion._rev = dto.hash;
-            }
-            await db.insert(newVersion);
-            return new DatabaseObject(task);
+            const existingEvents = await db.fetchRevs({
+                keys: events.map(ev => `e${ev.id}`)
+            });
+            console.log('Existing', existingEvents);
+            const newEvents = events.filter(
+                e => !existingEvents.rows.find(ee => ee.id === `e${e.id}`)
+            );
+            console.log('New', newEvents);
+            const result = await db.bulk({
+                docs: newEvents.map(ne => CouchDB.toEventDbo(id, ne))
+            });
+            console.log(result);
         } catch (e) {
-            const existing = await this.getById(id);
-            if (existing.isError) {
-                return new DatabaseError<Task>(DatabaseErrorType.Internal);
-            }
-            return new DatabaseError(DatabaseErrorType.Conflict, existing.value);
+            console.log(e);
         }
+        return new DatabaseObject<Task>(undefined);
     }
 
     async checkAndUpdate() {
-        const db = this._server.use(this._dbName);
+        const db = this._server.db.use(this._dbName);
         try {
             await db.insert(DesignDoc);
             console.log('Updated database');
         } catch (e) {
-            console.log(e);
+            if (e.statusCode !== 409) {
+                console.log(e);
+            }
         }
+    }
+
+    async events(id: string): Promise<TaskEventDto[]> {
+        const db = this._server.use(this._dbName);
+        const dbEvents = await db.view('tasks', 'events', {
+            key: id,
+            include_docs: true
+        });
+        return dbEvents.rows.map(row =>
+            CouchDB.toEventDto(row.doc as EventDbo)
+        );
     }
 
     private static toTask(dbo: TaskDbo): Task {
         const { _id, _rev, ...task } = dbo;
         return { id: _id.substring(1), hash: _rev, ...task } as Task;
+    }
+
+    private static toEventDbo(streamId: string, dto: TaskEventDto): EventDbo {
+        const { id, ...ev } = dto;
+        return {
+            _id: `e${id}`,
+            type: 'event',
+            streamId: streamId,
+            ...ev
+        };
+    }
+
+    private static toEventDto(dbo: EventDbo): TaskEventDto {
+        const { _id, _rev, type, streamId, ...ev } = dbo;
+        return {
+            id: _id.substr(1),
+            ...ev
+        };
     }
 }
