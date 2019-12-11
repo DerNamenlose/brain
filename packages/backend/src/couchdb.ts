@@ -1,13 +1,5 @@
 import { IDatabase } from './interfaces/IDatabase';
-import {
-    Task,
-    TaskEventDto,
-    IEvent,
-    IEventDto,
-    CreateEvent,
-    UpdateEvent,
-    DeleteEvent
-} from 'brain-common';
+import { Task, TaskBase } from 'brain-common';
 import {
     IDatabaseResult,
     DatabaseObject,
@@ -31,37 +23,22 @@ export const DesignDoc = {
                     }
                 }
               }`
-        },
-        events: {
-            map: `function(doc) {
-                if (doc.type == 'event')
-                {
-                    emit(doc.streamId, doc);
-                } 
-            }`
         }
     }
 };
 
-interface TaskDbo extends Task {
+/**
+ * Interface of objects stored in the database
+ */
+export interface TaskDbo extends TaskBase {
     _id: string;
-    _rev: string;
+    _rev?: string;
     type: 'task';
 }
 
-interface IEventDbo extends IEvent {
-    _id: string;
-    _rev?: string;
-    type: 'event';
-    streamId: string;
-}
-
-type CreateEventDbo = CreateEvent & IEventDbo;
-type UpdateEventDbo = UpdateEvent & IEventDbo;
-type DeleteEventDbo = DeleteEvent & IEventDbo;
-
-type EventDbo = CreateEventDbo | UpdateEventDbo | DeleteEventDbo;
-
+/**
+ * CouchDB implementation of the IDatabase interface
+ */
 export class CouchDB implements IDatabase {
     private _url: string;
     private _dbName: string;
@@ -77,7 +54,7 @@ export class CouchDB implements IDatabase {
         const db = this._server.db.use(this._dbName);
         const dbResult = await db.view('tasks', 'available');
         return dbResult.rows.map(entry =>
-            CouchDB.toTask(entry.value as TaskDbo)
+            CouchDB.toTaskDto(entry.value as TaskDbo)
         );
     }
 
@@ -85,30 +62,22 @@ export class CouchDB implements IDatabase {
         const db = this._server.db.use(this._dbName);
         try {
             const dbResult = await db.get(`t${id}`);
-            return new DatabaseObject(CouchDB.toTask(dbResult as TaskDbo));
+            return new DatabaseObject(CouchDB.toTaskDto(dbResult as TaskDbo));
         } catch (e) {
             return new DatabaseError<Task>(DatabaseErrorType.NotFound);
         }
     }
 
-    async handleEvents(
-        id: string,
-        events: TaskEventDto[]
-    ): Promise<IDatabaseResult<Task>> {
+    async saveTask(task: Task): Promise<IDatabaseResult<Task>> {
         const db = this._server.db.use(this._dbName);
         try {
-            const existingEvents = await db.fetchRevs({
-                keys: events.map(ev => `e${ev.id}`)
-            });
-            console.log('Existing', existingEvents);
-            const newEvents = events.filter(
-                e => !existingEvents.rows.find(ee => ee.id === `e${e.id}`)
-            );
-            console.log('New', newEvents);
-            const result = await db.bulk({
-                docs: newEvents.map(ne => CouchDB.toEventDbo(id, ne))
-            });
-            console.log(result);
+            await db.insert(CouchDB.toTaskDbo(task));
+            // const needsUpdate = await this.storeEvents(db, id, events);
+            // TODO: this is much too complicated. We should first go down the easy route
+            // and send an update based on the last known state. If things collide, we just
+            // check for equivalency (apart from the last known version) and accept if equal.
+            // If not accepted, we just display a collision, even if it was with ourselves
+            // from before.
         } catch (e) {
             console.log(e);
         }
@@ -127,37 +96,21 @@ export class CouchDB implements IDatabase {
         }
     }
 
-    async events(id: string): Promise<TaskEventDto[]> {
-        const db = this._server.use(this._dbName);
-        const dbEvents = await db.view('tasks', 'events', {
-            key: id,
-            include_docs: true
-        });
-        return dbEvents.rows.map(row =>
-            CouchDB.toEventDto(row.doc as EventDbo)
-        );
-    }
-
-    private static toTask(dbo: TaskDbo): Task {
+    private static toTaskDto(dbo: TaskDbo): Task {
         const { _id, _rev, ...task } = dbo;
         return { id: _id.substring(1), hash: _rev, ...task } as Task;
     }
 
-    private static toEventDbo(streamId: string, dto: TaskEventDto): EventDbo {
-        const { id, ...ev } = dto;
-        return {
-            _id: `e${id}`,
-            type: 'event',
-            streamId: streamId,
-            ...ev
+    private static toTaskDbo(dto: Task): TaskDbo {
+        const { id, hash, ...task } = dto;
+        const dbo: TaskDbo = {
+            _id: `t${id}`,
+            type: 'task',
+            ...task
         };
-    }
-
-    private static toEventDto(dbo: EventDbo): TaskEventDto {
-        const { _id, _rev, type, streamId, ...ev } = dbo;
-        return {
-            id: _id.substr(1),
-            ...ev
-        };
+        if (!!hash) {
+            dbo._rev = hash;
+        }
+        return dbo;
     }
 }

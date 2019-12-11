@@ -1,11 +1,9 @@
 export type TaskPrio = undefined | 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 
 /**
- * Base interface of all forms of the task. Basically contains the different
- * fields, shared by all instances
+ * The base interface of a task shared by all users
  */
-export interface Task {
-    id: string;
+export interface TaskBase {
     title: string;
     description?: string;
     priority?: TaskPrio;
@@ -21,6 +19,14 @@ export interface Task {
     start?: number; // the earliest day a task is to be started
     owner: string; // the owner of this task
     access?: string[]; // names of users, that have access to the task
+}
+
+/**
+ * Base interface of all forms of the task. Basically contains the different
+ * fields, shared by all instances
+ */
+export interface Task extends TaskBase {
+    id: string;
 }
 
 /**

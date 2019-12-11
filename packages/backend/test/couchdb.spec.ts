@@ -1,9 +1,8 @@
-import { CouchDB, DesignDoc } from '../src/couchdb';
+import { CouchDB, DesignDoc, TaskDbo } from '../src/couchdb';
 import * as nano from 'nano';
 import { DatabaseObject } from '../src/interfaces/DatabaseError';
 import { Task } from 'brain-common';
 import * as dotenv from 'dotenv';
-import { CreateEvent, TaskEventDto } from 'brain-common/src/TaskEvents';
 
 dotenv.config();
 const serverUrl = process.env.TESTHOST || 'http://localhost:5984';
@@ -76,69 +75,50 @@ describe('CouchDB backend', () => {
         expect(dbObject.value).toMatchObject(task);
     });
 
-    it('should store the events in the appropriate event stream', async () => {
-        const events: TaskEventDto[] = [
-            {
-                id: '1',
-                eventType: 'create',
-                timestamp: Date.now(),
-                task: {
-                    id: '123456',
-                    title: 'Title',
-                    owner: 'test'
-                }
-            }
-        ];
-        await db.handleEvents('123456', events);
-        const dbEvents = await db.events('123456');
-        expect(dbEvents).toEqual(events);
-    });
-
     it('create tasks correctly', async () => {
-        // const createEvent: CreateEvent = {
-        //     id: 'abcde',
-        //     task: {
-        //         id: '1234567890',
-        //         title: 'Test1',
-        //         description: 'Something',
-        //         owner: 'owner'
-        //     }
-        // };
-        // await db.saveTask(task);
-        // const directDb = directServer.db.use(dbName);
-        // const dbResult = await directDb.get(`t${task.id}`);
-        // const { _rev, ...dbo } = dbResult;
-        // expect(dbo as TaskDbo).to.eql({
-        //     _id: 't1234567890',
-        //     title: 'Test1',
-        //     description: 'Something',
-        //     owner: 'owner',
-        //     type: 'task'
-        // });
+        const task: Task = {
+            id: '123456',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner'
+        };
+        await db.saveTask(task);
+        const directDb = directServer.db.use(dbName);
+        const dbResult = await directDb.get(`t123456`);
+        expect(dbResult).toEqual({
+            _id: 't123456',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task',
+            _rev: expect.any(String)
+        });
     });
 
     it('should overwrite tasks correctly', async () => {
-        // const original = {
-        //     _id: 't1234567890',
-        //     title: 'Test1',
-        //     description: 'Something',
-        //     owner: 'owner',
-        //     type: 'task'
-        // };
-        // const directDb = directServer.db.use(dbName);
-        // await directDb.insert(original);
-        // const task = {
-        //     id: '1234567890',
-        //     title: 'Test1 new',
-        //     description: 'Something new',
-        //     owner: 'owner',
-        //     type: 'task'
-        // };
-        // const result = await db.saveTask(task);
-        // expect(result.isError).to.be.false;
-        // const retrieved = await db.getById('1234567890');
-        // expect(retrieved.isError).to.be.false;
-        // expect((retrieved as DatabaseObject<Task>).value).to.eql(task);
+        const original = {
+            _id: 't1234567890',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            type: 'task'
+        };
+        const directDb = directServer.db.use(dbName);
+        const createResult = await directDb.insert(original);
+        const task = {
+            id: '1234567890',
+            title: 'Test1 new',
+            hash: createResult.rev,
+            description: 'Something new',
+            owner: 'owner',
+            type: 'task'
+        };
+        const result = await db.saveTask(task);
+        expect(result.isError).toBeFalsy;
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).toBeFalsy;
+        const matcher = { ...task, hash: expect.any(String) };
+        expect(retrieved.value).toMatchObject(matcher);
     });
 
     it('should update the version hash on write', async () => {
