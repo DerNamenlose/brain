@@ -1,6 +1,10 @@
 import { CouchDB, DesignDoc, TaskDbo } from '../src/couchdb';
 import * as nano from 'nano';
-import { DatabaseObject } from '../src/interfaces/DatabaseError';
+import {
+    DatabaseObject,
+    DatabaseError,
+    DatabaseErrorType
+} from '../src/interfaces/DatabaseError';
 import { Task } from 'brain-common';
 import * as dotenv from 'dotenv';
 
@@ -70,7 +74,7 @@ describe('CouchDB backend', () => {
         const { id, ...dbo } = task;
         await directDb.insert({ _id: `t${task.id}`, ...dbo });
         const retrieved = await db.getById('1234567890');
-        expect(retrieved.isError).toBeFalsy;
+        expect(retrieved.isError).toBeFalsy();
         const dbObject = retrieved as DatabaseObject<Task>;
         expect(dbObject.value).toMatchObject(task);
     });
@@ -114,9 +118,9 @@ describe('CouchDB backend', () => {
             type: 'task'
         };
         const result = await db.saveTask(task);
-        expect(result.isError).toBeFalsy;
+        expect(result.isError).toBeFalsy();
         const retrieved = await db.getById('1234567890');
-        expect(retrieved.isError).toBeFalsy;
+        expect(retrieved.isError).toBeFalsy();
         const matcher = { ...task, hash: expect.any(String) };
         expect(retrieved.value).toMatchObject(matcher);
     });
@@ -132,8 +136,61 @@ describe('CouchDB backend', () => {
         const directDb = directServer.db.use(dbName);
         await directDb.insert(original);
         const taskResult = await db.getById('1234567890');
-        expect(taskResult.isError).toBeFalsy;
-        expect((taskResult as DatabaseObject<Task>).value.hash).not
-            .toBeUndefined;
+        expect(taskResult.isError).toBeFalsy();
+        expect(
+            (taskResult as DatabaseObject<Task>).value.hash
+        ).not.toBeUndefined();
+    });
+
+    it('should refuse to overwrite newer object versions', async () => {
+        const task = {
+            id: '1234567890',
+            title: 'Test1 new',
+            description: 'Something new',
+            owner: 'owner',
+            type: 'task'
+        };
+        let result = await db.saveTask(task);
+        expect(result.isError).toBeFalsy();
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).toBeFalsy();
+        const update = {
+            ...retrieved.value,
+            title: 'Updated'
+        };
+        result = await db.saveTask(update);
+        expect(result.isError).toBeFalsy();
+        // try to write a conflicting update
+        const conflict = {
+            ...retrieved.value,
+            title: 'Conflict'
+        };
+        result = await db.saveTask(conflict);
+        expect(result.isError).toBeTruthy();
+        const error = result as DatabaseError<Task>;
+        expect(error.type).toEqual(DatabaseErrorType.Conflict);
+    });
+
+    it('should implement idempotent object updates', async () => {
+        const task = {
+            id: '1234567890',
+            title: 'Test1 new',
+            description: 'Something new',
+            owner: 'owner',
+            type: 'task'
+        };
+        let result = await db.saveTask(task);
+        expect(result.isError).toBeFalsy();
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).toBeFalsy();
+        const update = {
+            ...retrieved.value,
+            title: 'Updated'
+        };
+        result = await db.saveTask(update);
+        expect(result.isError).toBeFalsy();
+        // try to write the update a second time (e.g. if the response to the update got lost)
+        result = await db.saveTask(update);
+        expect(result.isError).toBeFalsy();
     });
 });

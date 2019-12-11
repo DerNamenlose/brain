@@ -7,6 +7,7 @@ import {
     DatabaseErrorType
 } from './interfaces/DatabaseError';
 import * as nano from 'nano';
+import { deepEqual } from 'fast-equals';
 
 export const DesignDoc = {
     _id: '_design/tasks',
@@ -72,14 +73,17 @@ export class CouchDB implements IDatabase {
         const db = this._server.db.use(this._dbName);
         try {
             await db.insert(CouchDB.toTaskDbo(task));
-            // const needsUpdate = await this.storeEvents(db, id, events);
-            // TODO: this is much too complicated. We should first go down the easy route
-            // and send an update based on the last known state. If things collide, we just
-            // check for equivalency (apart from the last known version) and accept if equal.
-            // If not accepted, we just display a collision, even if it was with ourselves
-            // from before.
         } catch (e) {
             console.log(e);
+            if (e.statusCode === 409) {
+                const existing = await this.getById(task.id);
+                if (!CouchDB.isSameUpdate(task, existing.value)) {
+                    return new DatabaseError(
+                        DatabaseErrorType.Conflict,
+                        existing.value
+                    );
+                }
+            }
         }
         return new DatabaseObject<Task>(undefined);
     }
@@ -112,5 +116,16 @@ export class CouchDB implements IDatabase {
             dbo._rev = hash;
         }
         return dbo;
+    }
+
+    /**
+     * Compare, whether two tasks are actually the same apart from their version hash
+     * @param newTask The new task
+     * @param existingTask The existing version
+     */
+    private static isSameUpdate(newTask: Task, existingTask: Task): boolean {
+        const nt = { ...newTask, hash: '' };
+        const et = { ...existingTask, hash: '' };
+        return deepEqual(nt, et);
     }
 }
