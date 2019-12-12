@@ -1,8 +1,18 @@
 import { IConfig } from 'config';
 import * as express from 'express';
-import { Task, calculateVersionHash } from 'brain-common';
+import { Task } from 'brain-common';
 import { IDatabase } from './interfaces/IDatabase';
 import { DatabaseObject } from './interfaces/DatabaseError';
+
+interface ValidationErrorMessage {
+    message: string;
+    eventId?: string;
+}
+
+interface ValidationResult {
+    success: boolean;
+    errors: ValidationErrorMessage[];
+}
 
 export class Routes {
     private _config: IConfig;
@@ -20,7 +30,7 @@ export class Routes {
         app.route('/api/task').get(this.getTasks.bind(this));
         app.route('/api/task/:id')
             .get(this.getTask.bind(this))
-            .put(this.saveTask.bind(this));
+            .put(this.updateTasks.bind(this));
     }
 
     private serviceRoot(req: express.Request, res: express.Response) {
@@ -45,32 +55,55 @@ export class Routes {
         }
     }
 
-    private async saveTask(req: express.Request, res: express.Response) {
-        const update = {
-            ...req.body,
-            id: req.params['id']
-        } as Task;
-        if (!Routes.isValid(update)) {
-            res.status(400).send({ message: 'Missing required field' });
+    private async updateTasks(req: express.Request, res: express.Response) {
+        const task = req.body as Task;
+        console.log('Task', task);
+        const validationResult = Routes.isValid(task);
+        console.log('Validation', validationResult);
+        if (!validationResult.success) {
+            res.status(400).send(validationResult.errors);
             return;
         }
-        const result = await this._database.getById(req.params['id']);
-        const storedObject: Task = result.isError
-            ? undefined
-            : (result as DatabaseObject<Task>).value;
-
-        if (storedObject?.hash === update.hash) {
-            const storageResult = await this._database.saveTask(update);
-            if (storageResult.isError) {
-                res.status(500).send();
-                return;
-            }
-            res.status(200).send((storageResult as DatabaseObject<Task>).value);
+        const result = await this._database.saveTask(task);
+        if (result.isError) {
+            res.status(409);
+        } else {
+            res.status(200);
         }
-        res.status(409).send(storedObject);
+        res.send(result.value);
+        // const result = await this._database.getById(req.params['id']);
+        // const storedObject: Task = result.isError
+        //     ? undefined
+        //     : (result as DatabaseObject<Task>).value;
+
+        // if (storedObject?.hash === update.hash) {
+        //     const storageResult = await this._database.saveTask(update);
+        //     if (storageResult.isError) {
+        //         res.status(500).send();
+        //         return;
+        //     }
+        //     res.status(200).send((storageResult as DatabaseObject<Task>).value);
+        // }
+        // res.status(409).send(storedObject);
     }
 
-    private static isValid(task: Task): boolean {
-        return !!task.title;
+    private static isValid(task: Task): ValidationResult {
+        let result: ValidationResult = {
+            success: true,
+            errors: []
+        };
+        if (!task.id) {
+            result.success = false;
+            result.errors.push({ message: 'Tasks need an id' });
+        }
+        if (!task.title) {
+            result.success = false;
+            result.errors.push({ message: 'Tasks need a title' });
+        }
+        if (!task.owner) {
+            result.success = false;
+            result.errors.push({ message: 'Tasks need an owner' });
+        }
+        return result;
     }
 }
