@@ -79,6 +79,14 @@ describe('CouchDB backend', () => {
         expect(dbObject.value).toMatchObject(task);
     });
 
+    it('should indicate not found tasks', async () => {
+        const retrieved = await db.getById('1234567890');
+        expect(retrieved.isError).toBeTruthy();
+        expect((retrieved as DatabaseError<Task>).type).toBe(
+            DatabaseErrorType.NotFound
+        );
+    });
+
     it('create tasks correctly', async () => {
         const task: Task = {
             id: '123456',

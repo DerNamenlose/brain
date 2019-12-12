@@ -6,6 +6,7 @@ export interface IDatabaseResult<T> {
 }
 
 export enum DatabaseErrorType {
+    None,
     NotFound,
     Conflict,
     Internal
