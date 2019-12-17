@@ -2,6 +2,7 @@ import { Task, LegacyTask } from 'brain-common';
 import { openDB, IDBPDatabase, DBSchema, IDBPTransaction } from 'idb';
 import hash from 'object-hash';
 import { IGlobalConfig } from '../model/GlobalConfig';
+import { FrontendTask } from './FrontendTask';
 
 interface TaskDBSchema extends TaskDBSchemav2Schema {
     config: { key: string; value: IGlobalConfig };
@@ -15,8 +16,13 @@ interface TaskDBv1Schema extends DBSchema {
     tasks: { key: string; value: LegacyTask };
 }
 
-export class LocalStorage {
-    public async loadTasks(): Promise<Task[]> {
+export interface ILocalStorage {
+    loadTasks(): Promise<FrontendTask[]>;
+    markSync(task: Task): Promise<void>;
+}
+
+export class LocalStorage implements ILocalStorage {
+    public async loadTasks(): Promise<FrontendTask[]> {
         const db = await this.openDb();
         const tasks = await db
             .transaction('tasks')
@@ -27,25 +33,26 @@ export class LocalStorage {
     }
 
     public async create(task: Task): Promise<void> {
-        const versionedTask = LocalStorage.updateVersion({
-            ...task,
-            id: task.id.toString()
-        });
-        const db = await this.openDb();
-        const tx = db.transaction('tasks', 'readwrite');
-        await tx.objectStore('tasks').put(versionedTask);
-        await tx.done;
+        await this.storeTask(task, false);
     }
 
     public async update(task: Task): Promise<void> {
-        const versionedTask = LocalStorage.updateVersion({
+        await this.storeTask(task, false);
+    }
+
+    public async markSync(task: Task): Promise<void> {
+        await this.storeTask(task, true);
+    }
+
+    private async storeTask(task: Task, markSync: boolean): Promise<void> {
+        const frontendTask: FrontendTask = {
             ...task,
-            id: task.id.toString()
-        });
+            sync: markSync
+        };
         const db = await this.openDb();
-        console.log('Updating', versionedTask);
+        console.log('Updating', task);
         const tx = db.transaction('tasks', 'readwrite');
-        await tx.objectStore('tasks').put(versionedTask);
+        await tx.objectStore('tasks').put(frontendTask);
         await tx.done;
     }
 
@@ -125,7 +132,8 @@ export class LocalStorage {
                 created:
                     (object.created && object.created.getTime()) || Date.now(),
                 version: 0,
-                hash: ''
+                hash: '',
+                owner: ''
             };
             await transaction
                 .objectStore('tasks')
