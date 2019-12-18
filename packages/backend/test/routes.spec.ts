@@ -105,90 +105,28 @@ describe('tasks api', () => {
         expect(response.body).toMatchObject(existing);
     });
 
-    // it('should return a conflict when an update is based on an outdated version', async () => {
-    //     const db = {
-    //         handleEvents(id: string, events: TaskEvent[]) {
-    //             return Promise.resolve(
-    //                 new DatabaseError(DatabaseErrorType.Conflict)
-    //             );
-    //         }
-    //     };
-    //     const app = new App(config, db);
-    //     const response = await request(app.ExpressApp)
-    //         .put('/api/task/invalid_task')
-    //         .send({
-    //             id: 'invalid_task',
-    //             title: 'Test title',
-    //             hash: 'some random old hash'
-    //         });
-    //     expect(response.status).to.equal(409);
-    // });
-
-    // it('should accept subsequent updates based on the latest version', async () => {
-    //     const app = new App(config, db);
-    //     const firstUpdate = await request(app.ExpressApp)
-    //         .put('/api/task/task2')
-    //         .send({
-    //             ...tasks[1],
-    //             title: 'New title'
-    //         });
-    //     expect(firstUpdate.status).to.equal(200);
-    //     const newState = firstUpdate.body as Task;
-    //     newState.title = 'And another update';
-    //     const secondUpdate = await request(app.ExpressApp)
-    //         .put('/api/task/task2')
-    //         .send(newState);
-    //     expect(secondUpdate.status).to.equal(200);
-    // });
-
-    // it('should return the existing version on conflict', async () => {
-    //     const app = new App(config, db);
-    //     const response = await request(app.ExpressApp)
-    //         .put('/api/task/task2')
-    //         .send({
-    //             id: 'task2',
-    //             title: 'Test title',
-    //             hash: 'wrong hash'
-    //         });
-    //     expect(response.status).to.equal(409);
-    //     const existing = response.body as Task;
-    //     expect(existing).to.eql(tasks[1]);
-    // });
-
-    // it('should store a new task and retrieve it later', async () => {
-    //     const app = new App(config, db);
-    //     const task: Task = {
-    //         id: 'newtask',
-    //         title: 'Test title',
-    //         owner: ''
-    //     };
-    //     const response = await request(app.ExpressApp)
-    //         .put('/api/task/newtask')
-    //         .send(task);
-    //     expect(response.status).to.equal(200);
-    //     const getResponse = await request(app.ExpressApp).get(
-    //         '/api/task/newtask'
-    //     );
-    //     expect(getResponse.status).to.equal(200);
-    //     const retrieved: Task = getResponse.body;
-    //     expect(retrieved).to.eql(task);
-    // });
-
-    // it('should store an updated task and retrieve it later', async () => {
-    //     const app = new App(config, db);
-    //     const task: Task = {
-    //         ...tasks[0],
-    //         title: 'Changed title'
-    //     };
-    //     const response = await request(app.ExpressApp)
-    //         .put('/api/task/task1')
-    //         .send(task);
-    //     expect(response.status).to.equal(200);
-    //     const getResponse = await request(app.ExpressApp).get(
-    //         '/api/task/task1'
-    //     );
-    //     expect(getResponse.status).to.equal(200);
-    //     const retrieved: Task = getResponse.body;
-    //     expect(retrieved).to.eql(task);
-    // });
+    it('should return the new version hash on write', async () => {
+        const db = {
+            saveTask(task: Task) {
+                return Promise.resolve(
+                    new DatabaseObject({ ...task, hash: 'newHash' })
+                );
+            }
+        };
+        const app = new App(config, (db as unknown) as IDatabase);
+        const response = await request(app.ExpressApp)
+            .put('/api/task/task1')
+            .send({
+                id: 'task1',
+                title: 'New title',
+                owner: 'me'
+            });
+        expect(response.status).toEqual(200);
+        expect(response.body).toMatchObject({
+            id: 'task1',
+            title: 'New title',
+            owner: 'me',
+            hash: 'newHash'
+        });
+    });
 });

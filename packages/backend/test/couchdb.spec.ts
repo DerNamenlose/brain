@@ -94,7 +94,7 @@ describe('CouchDB backend', () => {
             description: 'Something',
             owner: 'owner'
         };
-        await db.saveTask(task);
+        const saveResult = await db.saveTask(task);
         const directDb = directServer.db.use(dbName);
         const dbResult = await directDb.get(`t123456`);
         expect(dbResult).toEqual({
@@ -104,6 +104,13 @@ describe('CouchDB backend', () => {
             owner: 'owner',
             type: 'task',
             _rev: expect.any(String)
+        });
+        expect(saveResult.value).toEqual({
+            id: '123456',
+            title: 'Test1',
+            description: 'Something',
+            owner: 'owner',
+            hash: expect.stringMatching(/1-.*/)
         });
     });
 
