@@ -71,20 +71,6 @@ export class Routes {
             res.status(200);
         }
         res.send(result.value);
-        // const result = await this._database.getById(req.params['id']);
-        // const storedObject: Task = result.isError
-        //     ? undefined
-        //     : (result as DatabaseObject<Task>).value;
-
-        // if (storedObject?.hash === update.hash) {
-        //     const storageResult = await this._database.saveTask(update);
-        //     if (storageResult.isError) {
-        //         res.status(500).send();
-        //         return;
-        //     }
-        //     res.status(200).send((storageResult as DatabaseObject<Task>).value);
-        // }
-        // res.status(409).send(storedObject);
     }
 
     private static isValid(task: Task): ValidationResult {
