@@ -72,7 +72,11 @@ export class CouchDB implements IDatabase {
     async saveTask(task: Task): Promise<IDatabaseResult<Task>> {
         const db = this._server.db.use(this._dbName);
         try {
-            await db.insert(CouchDB.toTaskDbo(task));
+            const result = await db.insert(CouchDB.toTaskDbo(task));
+            return new DatabaseObject<Task>({
+                ...task,
+                hash: result.rev
+            });
         } catch (e) {
             console.log(e);
             if (e.statusCode === 409) {
@@ -85,7 +89,7 @@ export class CouchDB implements IDatabase {
                 }
             }
         }
-        return new DatabaseObject<Task>(undefined);
+        return new DatabaseObject<Task>(task);
     }
 
     async checkAndUpdate() {
