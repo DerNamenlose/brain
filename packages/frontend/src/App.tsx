@@ -78,7 +78,8 @@ const App: React.FC = () => {
                                             id: nanoid(),
                                             title: '',
                                             version: 0,
-                                            hash: ''
+                                            hash: '',
+                                            owner: ''
                                         }}
                                         isNew
                                     />
