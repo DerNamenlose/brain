@@ -15,6 +15,7 @@ export interface SyncConfig {
 export class ServerSync {
     private _storage: ILocalStorage;
     private _config: SyncConfig;
+    private _timers: any[] = [];
 
     constructor(
         storage: ILocalStorage,
@@ -22,10 +23,33 @@ export class ServerSync {
     ) {
         this._storage = storage;
         this._config = config;
-        console.log(
-            `Starting synchonization with an interval of ${config.syncInterval} ms`
+        this._timers.push(setTimeout(this.syncToRemote.bind(this), 0));
+        this._timers.push(setTimeout(this.syncFromRemote.bind(this), 0));
+        this._timers.push(
+            setInterval(
+                this.syncFromRemote.bind(this),
+                this._config.syncInterval
+            )
         );
-        setTimeout(this.syncToRemote.bind(this), 0);
+    }
+
+    async syncFromRemote() {
+        const ctrl = new AbortController();
+        const response = await fetch('/api/tasks', { signal: ctrl.signal });
+        if (response.status !== 200) {
+            console.log(
+                `Could not load remote tasks. Reason: ${response.statusText}`
+            );
+        }
+        const remoteTasks = (await response.json()) as Task[];
+        const localTasks = await this._storage.loadTasks();
+        const updated = remoteTasks.filter(rt => {
+            const local = localTasks.find(lt => lt.id === rt.id);
+            return !local || (local.hash !== rt.hash && local.sync); // things that are sync, are only changed remote
+        });
+        for (const t of updated) {
+            await this._storage.storeTask(t, true);
+        }
     }
 
     async syncToRemote() {
@@ -67,5 +91,9 @@ export class ServerSync {
         );
         const localTasks = await localP;
         return { remoteTasks, localTasks };
+    }
+
+    shutdown() {
+        this._timers.forEach(timer => clearTimeout(timer));
     }
 }

@@ -2,14 +2,18 @@ import { ServerSync } from '../src/storage/ServerSync';
 import { GlobalWithFetchMock } from 'jest-fetch-mock';
 import { ILocalStorage } from '../src/storage/LocalStorage';
 import { Task } from 'brain-common';
-import { sleep } from './util';
 import { FrontendTask } from '../src/storage/FrontendTask';
+import { sleep } from './util';
 import nanoid = require('nanoid');
 
-class MockAbortController implements AbortController {
-    signal: AbortSignal;
+// jest.useFakeTimers();
 
-    abort(): void {}
+class MockAbortController implements AbortController {
+    signal: AbortSignal = undefined;
+
+    abort(): void {
+        this.signal?.dispatchEvent(new Event('abort'));
+    }
 }
 
 const customGlobal: GlobalWithFetchMock = global as GlobalWithFetchMock;
@@ -18,34 +22,105 @@ customGlobal.fetchMock = customGlobal.fetch;
 customGlobal.AbortController = MockAbortController;
 
 describe('Synchronization from remote server', () => {
+    let sync: ServerSync = null;
+
     beforeEach(() => {
         fetchMock.resetMocks();
     });
 
-    it('atttempt to retrieve all tasks after startup', async () => {
+    afterEach(() => {
+        sync && sync.shutdown();
+    });
+
+    it('atttempts to retrieve all tasks after startup', async () => {
         const remoteTask = {
             id: nanoid(),
             title: 'RemoteTask'
         };
 
-        const getMock = fetchMock.mockResponseOnce(
-            JSON.stringify([remoteTask])
-        );
+        fetchMock.mockResponse(JSON.stringify([remoteTask]));
         const storage = {
             loadTasks: jest.fn(() => Promise.resolve([] as Task[])),
-            markSync: jest.fn(() => Promise.resolve())
+            markSync: jest.fn(() => Promise.resolve()),
+            storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            )
         };
-        const sync = new ServerSync(storage);
+        sync = new ServerSync(storage);
         await sleep(15);
-        expect(fetchMock.mock.calls.length).toStrictEqual(1);
-        expect(fetchMock.mock.calls).toEqual([['/api/tasks']]);
-        expect(storage.loadTasks.mock.calls.length).toStrictEqual(1);
+        expect(fetchMock).toBeCalledWith('/api/tasks', { signal: undefined });
+        expect(storage.loadTasks).toBeCalledTimes(2);
+    });
+
+    it('injects retrieved tasks into the local storage', async () => {
+        const remoteTask = {
+            id: nanoid(),
+            title: 'RemoteTask'
+        };
+
+        fetchMock.mockResponse(JSON.stringify([remoteTask]));
+        const storage = {
+            loadTasks: jest.fn(() => Promise.resolve([] as Task[])),
+            markSync: jest.fn(() => Promise.resolve()),
+            storeTask: jest.fn((task: Task, isSync: boolean) => {
+                return Promise.resolve();
+            })
+        };
+        sync = new ServerSync(storage);
+        await sleep(15);
+        expect(fetchMock).toBeCalledWith('/api/tasks', { signal: undefined });
+        expect(storage.loadTasks).toBeCalledTimes(2);
+        expect(storage.storeTask).toBeCalledTimes(1);
+    });
+
+    it('updates remotely updated tasks locally', async () => {
+        const remoteTask = {
+            id: nanoid(),
+            title: 'RemoteTask',
+            hash: 'newVersion'
+        };
+
+        fetchMock.mockResponse(JSON.stringify([remoteTask]));
+        const storage = {
+            loadTasks: jest.fn(() =>
+                Promise.resolve([
+                    {
+                        id: remoteTask.id,
+                        title: 'Old remote task',
+                        hash: 'oldVersion',
+                        sync: true
+                    }
+                ] as FrontendTask[])
+            ),
+            markSync: jest.fn(() => Promise.resolve()),
+            storeTask: jest.fn((task: Task, isSync: boolean) => {
+                return Promise.resolve();
+            })
+        };
+        sync = new ServerSync(storage);
+        await sleep(15);
+        expect(storage.loadTasks).toBeCalledTimes(2);
+        expect(storage.storeTask).toBeCalledTimes(1);
+        expect(storage.storeTask).toBeCalledWith(
+            {
+                id: remoteTask.id,
+                title: 'RemoteTask',
+                hash: 'newVersion'
+            },
+            true
+        );
     });
 });
 
 describe('Synchronization to remote server', () => {
+    let serverSync: ServerSync = null;
+
     beforeEach(() => {
         fetchMock.resetMocks();
+    });
+
+    afterEach(() => {
+        serverSync && serverSync.shutdown();
     });
 
     it('atttempt to upload all locally updated tasks after startup', async () => {
@@ -73,29 +148,40 @@ describe('Synchronization to remote server', () => {
             }
         ];
 
-        const getMock = fetchMock.mockResponseOnce(JSON.stringify([]));
+        fetchMock.mockResponse(JSON.stringify([]));
         const storage = {
             loadTasks: jest.fn(() => Promise.resolve(localTasks as Task[])),
-            markSync: jest.fn(() => Promise.resolve())
+            markSync: jest.fn(() => Promise.resolve()),
+            storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            )
         };
-        const sync = new ServerSync(storage);
+        serverSync = new ServerSync(storage);
         await sleep(15);
-        expect(fetchMock.mock.calls.length).toStrictEqual(2);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
         const transferredTasks = localTasks.map(lt => {
             const { sync, ...task } = lt;
             return task;
         });
-        expect(fetchMock.mock.calls).toEqual([
-            [
-                `/api/tasks/${localTasks[0].id}`,
-                { method: 'PUT', body: JSON.stringify(transferredTasks[0]) }
-            ],
-            [
-                `/api/tasks/${localTasks[1].id}`,
-                { method: 'PUT', body: JSON.stringify(transferredTasks[1]) }
-            ]
-        ]);
-        expect(storage.loadTasks.mock.calls.length).toStrictEqual(1);
+        expect(fetchMock).toHaveBeenCalledWith('/api/tasks', {
+            signal: undefined
+        });
+        expect(fetchMock).toHaveBeenCalledWith(
+            `/api/tasks/${localTasks[0].id}`,
+            {
+                method: 'PUT',
+                body: JSON.stringify(transferredTasks[0]),
+                signal: undefined
+            }
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            `/api/tasks/${localTasks[1].id}`,
+            {
+                method: 'PUT',
+                body: JSON.stringify(transferredTasks[1]),
+                signal: undefined
+            }
+        );
     });
 
     it('atttempts to upload all locally updated tasks after startup', async () => {
@@ -109,27 +195,28 @@ describe('Synchronization to remote server', () => {
             }
         ];
 
-        const getMock = fetchMock.mockResponseOnce(JSON.stringify([]));
+        fetchMock.mockResponse(JSON.stringify([]));
         const storage = {
             loadTasks: jest.fn(() => Promise.resolve(localTasks as Task[])),
             markSync: jest.fn((task: Task) => {
                 localTasks.find(t => t.id === task.id).sync = true;
                 return Promise.resolve();
-            })
+            }),
+            storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            )
         };
-        const serverSync = new ServerSync(storage);
+        serverSync = new ServerSync(storage);
         await sleep(15);
-        console.log(fetchMock.mock.calls);
-        expect(fetchMock.mock.calls.length).toStrictEqual(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
         const { sync, ...reference } = localTasks[0];
-        expect(fetchMock.mock.calls).toEqual([
-            [
-                `/api/tasks/${localTasks[0].id}`,
-                { method: 'PUT', body: JSON.stringify(reference) }
-            ]
-        ]);
-        expect(storage.loadTasks.mock.calls.length).toStrictEqual(1);
-        expect(storage.markSync.mock.calls.length).toStrictEqual(1);
+        expect(fetchMock).toHaveBeenCalledWith('/api/tasks', {
+            signal: undefined
+        });
+        expect(fetchMock).toHaveBeenCalledWith(
+            `/api/tasks/${localTasks[0].id}`,
+            { method: 'PUT', body: JSON.stringify(reference) }
+        );
     });
 
     it('retries failed uploads', async () => {
@@ -143,33 +230,36 @@ describe('Synchronization to remote server', () => {
             }
         ];
 
-        const getMock = fetchMock.mockReject();
+        fetchMock.mockRejectOnce().mockResponseOnce(JSON.stringify([]));
         const storage = {
             loadTasks: jest.fn(() => Promise.resolve(localTasks as Task[])),
             markSync: jest.fn((task: Task) => {
                 localTasks.find(t => t.id === task.id).sync = true;
                 return Promise.resolve();
-            })
+            }),
+            storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            )
         };
-        const serverSync = new ServerSync(storage, {
+        serverSync = new ServerSync(storage, {
             retryInterval: 10,
             syncInterval: 2000
         });
-        await sleep(15);
-        console.log(fetchMock.mock.calls);
-        expect(fetchMock.mock.calls.length).toStrictEqual(2);
+        await sleep(200);
+        expect(fetchMock).toHaveBeenCalledTimes(3);
         const { sync, ...reference } = localTasks[0];
-        expect(fetchMock.mock.calls).toEqual([
-            [
-                `/api/tasks/${localTasks[0].id}`,
-                { method: 'PUT', body: JSON.stringify(reference) }
-            ],
-            [
-                `/api/tasks/${localTasks[0].id}`,
-                { method: 'PUT', body: JSON.stringify(reference) }
-            ]
-        ]);
-        expect(storage.loadTasks.mock.calls.length).toStrictEqual(2);
-        expect(storage.markSync.mock.calls.length).toStrictEqual(0);
+        expect(fetchMock).toHaveBeenCalledWith('/api/tasks', {
+            signal: undefined
+        });
+        expect(fetchMock).toHaveBeenCalledWith(
+            `/api/tasks/${localTasks[0].id}`,
+            { method: 'PUT', body: JSON.stringify(reference) }
+        );
+        expect(fetchMock).toHaveBeenCalledWith(
+            `/api/tasks/${localTasks[0].id}`,
+            { method: 'PUT', body: JSON.stringify(reference) }
+        );
+        expect(storage.loadTasks).toHaveBeenCalledTimes(3);
+        expect(storage.markSync).toHaveBeenCalledTimes(1);
     });
 });
