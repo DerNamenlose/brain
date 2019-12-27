@@ -9,7 +9,7 @@ interface TaskDBSchema extends TaskDBSchemav2Schema {
 }
 
 interface TaskDBSchemav2Schema extends DBSchema {
-    tasks: { key: string; value: Task };
+    tasks: { key: string; value: FrontendTask };
 }
 
 interface TaskDBv1Schema extends DBSchema {
@@ -20,6 +20,7 @@ export interface ILocalStorage {
     loadTasks(): Promise<FrontendTask[]>;
     markSync(task: Task): Promise<void>;
     storeTask(task: Task, isSync: boolean): Promise<void>;
+    addConflict(taskId: string, conflictingVersion: Task): Promise<void>;
 }
 
 export class LocalStorage implements ILocalStorage {
@@ -55,6 +56,24 @@ export class LocalStorage implements ILocalStorage {
         const tx = db.transaction('tasks', 'readwrite');
         await tx.objectStore('tasks').put(frontendTask);
         await tx.done;
+    }
+
+    public async addConflict(
+        taskId: string,
+        conflictingVersion: Task
+    ): Promise<void> {
+        const db = await this.openDb();
+        console.log(`Conflicting task with id ${taskId}`);
+        const tx = db.transaction('tasks', 'readwrite');
+        const localVersion = await tx.objectStore('tasks').get(taskId);
+        if (!localVersion) {
+            console.log('Attempting to mark non-existent task as conflicted.');
+            tx.abort();
+        } else {
+            localVersion.conflictingVersion = conflictingVersion;
+            await tx.objectStore('tasks').put(localVersion);
+            await tx.done;
+        }
     }
 
     public async config(): Promise<IGlobalConfig> {

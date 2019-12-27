@@ -50,6 +50,13 @@ export class ServerSync {
         for (const t of updated) {
             await this._storage.storeTask(t, true);
         }
+        const conflicted = remoteTasks.filter(rt => {
+            const local = localTasks.find(lt => lt.id === rt.id);
+            return local && local.hash !== rt.hash && !local.sync; // things that are sync, are only changed remote
+        });
+        for (const t of conflicted) {
+            this._storage.addConflict(t.id, t);
+        }
     }
 
     async syncToRemote() {

@@ -44,6 +44,9 @@ describe('Synchronization from remote server', () => {
             markSync: jest.fn(() => Promise.resolve()),
             storeTask: jest.fn((task: Task, isSync: boolean) =>
                 Promise.resolve()
+            ),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
+                Promise.resolve()
             )
         };
         sync = new ServerSync(storage);
@@ -64,7 +67,10 @@ describe('Synchronization from remote server', () => {
             markSync: jest.fn(() => Promise.resolve()),
             storeTask: jest.fn((task: Task, isSync: boolean) => {
                 return Promise.resolve();
-            })
+            }),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
+                Promise.resolve()
+            )
         };
         sync = new ServerSync(storage);
         await sleep(15);
@@ -95,7 +101,10 @@ describe('Synchronization from remote server', () => {
             markSync: jest.fn(() => Promise.resolve()),
             storeTask: jest.fn((task: Task, isSync: boolean) => {
                 return Promise.resolve();
-            })
+            }),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
+                Promise.resolve()
+            )
         };
         sync = new ServerSync(storage);
         await sleep(15);
@@ -109,6 +118,44 @@ describe('Synchronization from remote server', () => {
             },
             true
         );
+    });
+
+    it('attaches the server version to conflicted tasks', async () => {
+        const remoteTask = {
+            id: nanoid(),
+            title: 'RemoteTask',
+            hash: 'newVersion'
+        };
+
+        fetchMock.mockResponse(JSON.stringify([remoteTask]));
+        const storage = {
+            loadTasks: jest.fn(() =>
+                Promise.resolve([
+                    {
+                        id: remoteTask.id,
+                        title: 'updated local task',
+                        hash: 'changedVersion',
+                        sync: false
+                    }
+                ] as FrontendTask[])
+            ),
+            markSync: jest.fn(() => Promise.resolve()),
+            storeTask: jest.fn((task: Task, isSync: boolean) => {
+                return Promise.resolve();
+            }),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
+                Promise.resolve()
+            )
+        };
+        sync = new ServerSync(storage);
+        await sleep(15);
+        expect(storage.loadTasks).toBeCalledTimes(2);
+        expect(storage.addConflict).toBeCalledTimes(1);
+        expect(storage.addConflict).toBeCalledWith(remoteTask.id, {
+            id: remoteTask.id,
+            title: 'RemoteTask',
+            hash: 'newVersion'
+        });
     });
 });
 
@@ -153,6 +200,9 @@ describe('Synchronization to remote server', () => {
             loadTasks: jest.fn(() => Promise.resolve(localTasks as Task[])),
             markSync: jest.fn(() => Promise.resolve()),
             storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            ),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
                 Promise.resolve()
             )
         };
@@ -204,6 +254,9 @@ describe('Synchronization to remote server', () => {
             }),
             storeTask: jest.fn((task: Task, isSync: boolean) =>
                 Promise.resolve()
+            ),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
+                Promise.resolve()
             )
         };
         serverSync = new ServerSync(storage);
@@ -238,6 +291,9 @@ describe('Synchronization to remote server', () => {
                 return Promise.resolve();
             }),
             storeTask: jest.fn((task: Task, isSync: boolean) =>
+                Promise.resolve()
+            ),
+            addConflict: jest.fn((taskId: string, conflictingVersion: Task) =>
                 Promise.resolve()
             )
         };
