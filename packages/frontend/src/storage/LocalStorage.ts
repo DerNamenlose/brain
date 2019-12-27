@@ -19,6 +19,7 @@ interface TaskDBv1Schema extends DBSchema {
 export interface ILocalStorage {
     loadTasks(): Promise<FrontendTask[]>;
     markSync(task: Task): Promise<void>;
+    storeTask(task: Task, isSync: boolean): Promise<void>;
 }
 
 export class LocalStorage implements ILocalStorage {
@@ -44,10 +45,10 @@ export class LocalStorage implements ILocalStorage {
         await this.storeTask(task, true);
     }
 
-    private async storeTask(task: Task, markSync: boolean): Promise<void> {
+    public async storeTask(task: Task, isSync: boolean): Promise<void> {
         const frontendTask: FrontendTask = {
             ...task,
-            sync: markSync
+            sync: isSync
         };
         const db = await this.openDb();
         console.log('Updating', task);
