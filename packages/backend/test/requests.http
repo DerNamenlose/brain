@@ -5,9 +5,16 @@ GET {{baseUrl}}/api
 GET {{baseUrl}}/api/task
 
 ###
-PUT {{baseUrl}}/api/task/{{$guid}}
+PUT {{baseUrl}}/api/task/ABCDEFG
 Content-Type: application/json
 
-{
-    "title" : "Some test title"
-}
+[
+    {
+        "eventType": "create",
+        "id": "Tralala",
+        "timestamp": 12345667890,
+        "task": {
+            "id" : "ABCDEF"
+        }
+    }
+]

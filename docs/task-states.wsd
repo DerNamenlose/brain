@@ -1,0 +1,13 @@
+@startuml Frontend task states
+
+[*] --> Sync : EvRemoteUpdate
+[*] --> Changed : EvCreate
+Sync --> Changed : EvUpdate
+Changed --> Conflict : [remote state<>local state]\nEvRemoteUpdate\n/ add conflicting state
+Changed --> Sync : EvUploaded
+Conflict --> Sync : EvAccept\n/ remove conflicting state
+Conflict --> Changed : EvUpdate\n/ remove conflicting state
+Conflict --> Conflict : [remote state<>local state]\nEvRemoteUpdate\n/ update conflicting state
+Conflict --> Sync : [remote state=local state]\nEvRemoteUpdate
+
+@enduml

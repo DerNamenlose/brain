@@ -1,4 +1,5 @@
 import { Task } from 'brain-common';
+import { SyncState } from './TaskStateMachine';
 
 /**
  * The task type stored in the frontend with additional fields for keeping
@@ -6,9 +7,9 @@ import { Task } from 'brain-common';
  */
 export interface FrontendTask extends Task {
     /**
-     * flag indicating, that the was synced since its last update
+     * The current synchronization state of the task
      */
-    sync?: boolean;
+    syncState: SyncState;
 
     /**
      * If a task in a conflicted state, this field contains the

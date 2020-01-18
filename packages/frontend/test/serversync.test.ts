@@ -157,6 +157,10 @@ describe('Synchronization from remote server', () => {
             hash: 'newVersion'
         });
     });
+
+    it('resolves conflicts when they were resolved remotely', async () => {
+        expect(false).toBeTruthy();
+    });
 });
 
 describe('Synchronization to remote server', () => {
