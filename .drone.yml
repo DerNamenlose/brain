@@ -6,6 +6,7 @@ steps:
     - name: build-frontend
       image: node
       commands:
+          - lerna bootstrap
           - cd packages/frontend
           - npm install
           - npm run build
