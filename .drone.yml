@@ -8,5 +8,4 @@ steps:
       commands:
           - npx lerna bootstrap
           - cd packages/frontend
-          - npm install
           - npm run build
