@@ -1,0 +1,11 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+    - name: build-frontend
+      image: node
+      commands:
+          - npx lerna bootstrap
+          - cd packages/frontend
+          - npm run build
