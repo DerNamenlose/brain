@@ -228,7 +228,7 @@ export function reduce(
     newState.inboxEmpty =
         inboxFilter(newState.config, newState.tasks).length === 0;
     newState.somedayMaybeEmpty =
-        somedayMaybeFilter(newState.tasks).length === 0;
+        somedayMaybeFilter(newState.config, newState.tasks).length === 0;
     return newState;
 }
 

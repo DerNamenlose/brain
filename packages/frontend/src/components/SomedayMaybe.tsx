@@ -29,7 +29,9 @@ export function SomedayMaybe() {
         <GlobalState.Consumer>
             {state => (
                 <Fragment>
-                    <TaskList tasks={somedayMaybeFilter(state.tasks)} />
+                    <TaskList
+                        tasks={somedayMaybeFilter(state.config, state.tasks)}
+                    />
                     <AppBar className={classes.appBar}>
                         <Toolbar>
                             <Button
