@@ -208,6 +208,9 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 setEditedTask(nv);
                             }}
                             values={editedTask.contexts}
+                            style={{
+                                zIndex: 'unset'
+                            }}
                         />
                         <ReactSelectMaterialUi
                             label='Projects'
@@ -225,6 +228,9 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 setEditedTask(nv);
                             }}
                             values={editedTask.projects}
+                            style={{
+                                zIndex: 'unset'
+                            }}
                         />
                         <ReactSelectMaterialUi
                             label='Tags'
@@ -242,6 +248,9 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 setEditedTask(nv);
                             }}
                             values={editedTask.tags}
+                            style={{
+                                zIndex: 'unset'
+                            }}
                         />
                         <FormControl>
                             Start:
