@@ -13,7 +13,7 @@ function PostponeButton(props: {
         return (
             <IconButton
                 style={{
-                    backgroundColor: '#808080',
+                    backgroundColor: '#A0A0A0',
                     margin: '0.5rem'
                 }}
                 onClick={props.onClick}
