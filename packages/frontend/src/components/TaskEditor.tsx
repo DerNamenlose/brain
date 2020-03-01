@@ -35,10 +35,15 @@ import { StartDueButtons } from './StartDueButtons';
 
 const useStyles = makeStyles(theme =>
     createStyles({
-        buttons: {
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            marginTop: theme.spacing(2)
+        buttonGroup: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            display: 'flex'
+        },
+        button: {
+            flexGrow: 1
         },
         error: {
             backgroundColor: theme.palette.error.main,
@@ -116,7 +121,13 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
         <GlobalState.Consumer>
             {state => (
                 <Fragment>
-                    <h1>{props.isNew ? 'Create' : 'Edit'} task</h1>
+                    <h1
+                        style={{
+                            marginTop: '3rem',
+                            marginBottom: 0
+                        }}>
+                        {props.isNew ? 'Create' : 'Edit'} task
+                    </h1>
                     {validation.hasAnyError() && (
                         <Paper className={classes.error}>
                             Could not save task.
@@ -280,13 +291,14 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 <MenuItem value={'F'}>F</MenuItem>
                             </Select>
                         </FormControl>
-                        <ButtonGroup className={classes.buttons}>
+                        <ButtonGroup className={classes.buttonGroup}>
                             <ResponsiveButton
                                 icon={<SaveIcon />}
                                 extended='Save'
                                 color='primary'
-                                variant='contained'
+                                variant='outlined'
                                 aria-label='Save'
+                                className={classes.button}
                                 onClick={() => {
                                     const res = validate(editedTask);
                                     if (res.hasAnyError()) {
@@ -303,6 +315,7 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 color='primary'
                                 variant='contained'
                                 aria-label='Skip task'
+                                className={classes.button}
                                 onClick={() => {
                                     props.onSkip && props.onSkip();
                                 }}
@@ -316,8 +329,9 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 icon={<CancelIcon />}
                                 extended='Cancel'
                                 color='secondary'
-                                variant='contained'
+                                variant='outlined'
                                 aria-label='Cancel'
+                                className={classes.button}
                                 onClick={() =>
                                     props.onCancel && props.onCancel()
                                 }
