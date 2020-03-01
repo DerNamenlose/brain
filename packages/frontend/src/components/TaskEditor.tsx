@@ -32,7 +32,7 @@ import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
-import { toDateDisplay } from '../util/displayHelper';
+import { StartDueButtons } from './StartDueButtons';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -252,48 +252,34 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 zIndex: 'unset'
                             }}
                         />
-                        <FormControl>
-                            Start:
-                            <input
-                                id='start'
-                                type='date'
-                                value={
-                                    (editedTask.start &&
-                                        toDateDisplay(editedTask.start)) ||
-                                    ''
+                        <StartDueButtons
+                            due={
+                                !!editedTask.due
+                                    ? new Date(editedTask.due)
+                                    : undefined
+                            }
+                            start={
+                                !!editedTask.start
+                                    ? new Date(editedTask.start)
+                                    : undefined
                                 }
-                                onChange={ev => {
+                            onDueChange={newDate => {
                                     const nv = copyAndUpdate(
                                         editedTask,
-                                        'start',
-                                        ev.target.valueAsDate &&
-                                            ev.target.valueAsDate.getTime()
+                                    'due',
+                                    newDate && newDate.getTime()
+                                    );
+                                    setEditedTask(nv);
+                                }}
+                            onStartChange={newDate => {
+                                    const nv = copyAndUpdate(
+                                        editedTask,
+                                    'start',
+                                    newDate && newDate.getTime()
                                     );
                                     setEditedTask(nv);
                                 }}
                             />
-                        </FormControl>
-                        <FormControl>
-                            Due:
-                            <input
-                                id='due'
-                                type='date'
-                                value={
-                                    (editedTask.due &&
-                                        toDateDisplay(editedTask.due)) ||
-                                    ''
-                                }
-                                onChange={ev => {
-                                    const nv = copyAndUpdate(
-                                        editedTask,
-                                        'due',
-                                        ev.target.valueAsDate &&
-                                            ev.target.valueAsDate.getTime()
-                                    );
-                                    setEditedTask(nv);
-                                }}
-                            />
-                        </FormControl>
                         <FormControl>
                             <InputLabel htmlFor='priority'>Priority</InputLabel>
                             <Select
