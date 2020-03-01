@@ -4,11 +4,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import { IconButton } from '@material-ui/core';
 
-function PostponeButton(props: {
-    isPostponed: boolean;
-    disabled?: boolean;
-    onClick: () => void;
-}) {
+function PostponeButton(props: { isPostponed: boolean; onClick: () => void }) {
     if (!props.isPostponed) {
         return (
             <IconButton
@@ -16,8 +12,7 @@ function PostponeButton(props: {
                     backgroundColor: '#A0A0A0',
                     margin: '0.5rem'
                 }}
-                onClick={props.onClick}
-                disabled={props.disabled}>
+                onClick={props.onClick}>
                 <AllInclusiveIcon
                     style={{
                         fontSize: '3rem',
@@ -33,8 +28,7 @@ function PostponeButton(props: {
                 backgroundColor: '#FFA000',
                 margin: '0.5rem'
             }}
-            onClick={props.onClick}
-            disabled={props.disabled}>
+            onClick={props.onClick}>
             <PlayIcon
                 style={{
                     fontSize: '3rem',
@@ -58,11 +52,12 @@ export function FinishPostponeButtons(props: {
                 marginLeft: 'auto',
                 marginRight: 'auto'
             }}>
-            <PostponeButton
-                isPostponed={!!props.isPostponed && !props.isDone}
-                onClick={props.onPostponedChange}
-                disabled={props.isDone} // finished tasks can no longer be postponed
-            />
+            {!props.isDone && (
+                <PostponeButton
+                    isPostponed={!!props.isPostponed && !props.isDone}
+                    onClick={props.onPostponedChange}
+                />
+            )}
             <IconButton
                 style={{
                     backgroundColor: props.isDone ? '#00A000' : '#A0A0A0',
