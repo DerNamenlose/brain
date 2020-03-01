@@ -18,11 +18,9 @@ import {
     DialogTitle,
     Typography
 } from '@material-ui/core';
-import { green, orange, yellow } from '@material-ui/core/colors';
+import { green, orange } from '@material-ui/core/colors';
 import SaveIcon from '@material-ui/icons/Save';
 import CancelIcon from '@material-ui/icons/Cancel';
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
-import PlayIcon from '@material-ui/icons/PlayArrow';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import { ResponsiveButton } from './ResponsiveButton';
 import { useHistory } from 'react-router-dom';
@@ -32,6 +30,7 @@ import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
+import { FinishPostponeButtons } from './FinishPostponeButtons';
 import { StartDueButtons } from './StartDueButtons';
 
 const useStyles = makeStyles(theme =>
@@ -53,12 +52,6 @@ const useStyles = makeStyles(theme =>
 const SkipButton = withStyles({
     root: {
         backgroundColor: orange[500]
-    }
-})(ResponsiveButton);
-
-const PostponeButton = withStyles({
-    root: {
-        backgroundColor: yellow[500]
     }
 })(ResponsiveButton);
 
@@ -106,31 +99,6 @@ function validate(task: Task): ValidationResult {
     return result;
 }
 
-function StateButton(props: { task: Task; onClick: () => void }) {
-    const StyledButton = withStyles(theme => ({
-        root: {
-            backgroundColor: props.task.done
-                ? theme.palette.grey[500]
-                : green[500],
-            '& .stateText': {
-                textDecoration: props.task.done ? 'line-through' : 'none'
-            },
-            margin: theme.spacing(1)
-        }
-    }))(Button);
-    return (
-        <StyledButton
-            variant='contained'
-            color='primary'
-            onClick={props.onClick}>
-            <span className='stateText'>
-                Task is {props.task.done ? 'done. ' : 'open. '}
-            </span>
-            <span>{props.task.done ? 'Reopen?' : 'Finish?'}</span>
-        </StyledButton>
-    );
-}
-
 export function TaskEditorControl(props: TaskEditorControlProps) {
     const classes = useStyles();
     const [editedTask, setEditedTask] = useState({ ...props.task });
@@ -171,15 +139,6 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 </FormHelperText>
                             )}
                         </FormControl>
-                        <StateButton
-                            task={editedTask}
-                            onClick={() =>
-                                setEditedTask({
-                                    ...editedTask,
-                                    done: !editedTask.done
-                                })
-                            }
-                        />
                         <FormControl>
                             <InputLabel htmlFor='Description'>
                                 Description
@@ -192,6 +151,22 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 onChange={handleChange('description')}
                             />
                         </FormControl>
+                        <FinishPostponeButtons
+                            isPostponed={editedTask.postponed}
+                            isDone={editedTask.done}
+                            onDoneChange={() =>
+                                setEditedTask({
+                                    ...editedTask,
+                                    done: !editedTask.done
+                                })
+                            }
+                            onPostponedChange={() =>
+                                setEditedTask({
+                                    ...editedTask,
+                                    postponed: !editedTask.postponed
+                                })
+                            }
+                        />
                         <ReactSelectMaterialUi
                             label='Contexts'
                             options={sortAndUniqueString(
@@ -262,24 +237,24 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 !!editedTask.start
                                     ? new Date(editedTask.start)
                                     : undefined
-                                }
+                            }
                             onDueChange={newDate => {
-                                    const nv = copyAndUpdate(
-                                        editedTask,
+                                const nv = copyAndUpdate(
+                                    editedTask,
                                     'due',
                                     newDate && newDate.getTime()
-                                    );
-                                    setEditedTask(nv);
-                                }}
+                                );
+                                setEditedTask(nv);
+                            }}
                             onStartChange={newDate => {
-                                    const nv = copyAndUpdate(
-                                        editedTask,
+                                const nv = copyAndUpdate(
+                                    editedTask,
                                     'start',
                                     newDate && newDate.getTime()
-                                    );
-                                    setEditedTask(nv);
-                                }}
-                            />
+                                );
+                                setEditedTask(nv);
+                            }}
+                        />
                         <FormControl>
                             <InputLabel htmlFor='priority'>Priority</InputLabel>
                             <Select
@@ -319,36 +294,6 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                     } else {
                                         props.onSave &&
                                             props.onSave(editedTask);
-                                    }
-                                }}
-                            />
-                            <PostponeButton
-                                icon={
-                                    !!editedTask.postponed ? (
-                                        <PlayIcon />
-                                    ) : (
-                                        <AllInclusiveIcon />
-                                    )
-                                }
-                                extended={
-                                    !!editedTask.postponed
-                                        ? 'Activate'
-                                        : 'Postpone'
-                                }
-                                color='primary'
-                                variant='contained'
-                                aria-label={
-                                    !!editedTask.postponed
-                                        ? 'Activate'
-                                        : 'Postpone'
-                                }
-                                onClick={() => {
-                                    const res = validate(editedTask);
-                                    if (res.hasAnyError()) {
-                                        setValidation(res);
-                                    } else {
-                                        props.onPostpone &&
-                                            props.onPostpone(editedTask);
                                     }
                                 }}
                             />
