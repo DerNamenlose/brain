@@ -30,7 +30,7 @@ import { sortAndUniqueString } from '../util/order';
 import { ValidationResult } from '../util/ValidationResult';
 import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
-import { FinishPostponeButtons } from './FinishPostponeButtons';
+import { FinishPostponeDelegateButtons } from './FinishPostponeDelegateButtons';
 import { StartDueButtons } from './StartDueButtons';
 
 const useStyles = makeStyles(theme =>
@@ -170,9 +170,10 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                 />
                             </FormControl>
                             <FormControl fullWidth>
-                                <FinishPostponeButtons
+                                <FinishPostponeDelegateButtons
                                     isPostponed={editedTask.postponed}
                                     isDone={editedTask.done}
+                                    delegatedTo={editedTask.delegatedTo}
                                     onDoneChange={() =>
                                         setEditedTask({
                                             ...editedTask,
@@ -185,6 +186,14 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                                             postponed: !editedTask.postponed
                                         })
                                     }
+                                    onDelegateChange={() => {
+                                        setEditedTask({
+                                            ...editedTask,
+                                            delegatedTo: !!editedTask.delegatedTo
+                                                ? undefined
+                                                : 'someone'
+                                        });
+                                    }}
                                 />
                             </FormControl>
                             <ReactSelectMaterialUi

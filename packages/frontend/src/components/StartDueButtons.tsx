@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { IconButton } from '@material-ui/core';
 import AlarmOnIcon from '@material-ui/icons/AlarmOn';
-import { TaskStart } from './Icons';
+import { TaskStartIcon } from './Icons';
 import { ClearableDatePicker } from './ClearableDatePicker';
 import { useStyles } from './styles';
+import { IconStateButton } from './IconStateButton';
+import { toDateDisplay } from '../util/displayHelper';
 
 export function StartDueButtons(props: {
     due?: Date;
@@ -21,26 +23,22 @@ export function StartDueButtons(props: {
                 marginLeft: 'auto',
                 marginRight: 'auto'
             }}>
-            <IconButton
-                style={{
-                    backgroundColor: !!props.due ? '#00A000' : '#A0A0A0',
-                    margin: '0.5rem'
-                }}
-                onClick={() => {
-                    setDueOpen(true);
-                }}>
-                <AlarmOnIcon className={classes.buttonIcon} />
-            </IconButton>
-            <IconButton
-                style={{
-                    backgroundColor: !!props.start ? '#00A000' : '#A0A0A0',
-                    margin: '0.5rem'
-                }}
-                onClick={() => {
-                    setStartOpen(true);
-                }}>
-                <TaskStart className={classes.buttonIcon} />
-            </IconButton>
+            <IconStateButton
+                active={!!props.due}
+                activeColor='#00A000'
+                inactiveColor='#A0A0A0'
+                icon={<AlarmOnIcon />}
+                text={props.due && toDateDisplay(props.due.getTime())}
+                onClick={() => setDueOpen(true)}
+            />
+            <IconStateButton
+                active={!!props.start}
+                activeColor='#00A000'
+                inactiveColor='#A0A0A0'
+                icon={<TaskStartIcon />}
+                text={props.start && toDateDisplay(props.start.getTime())}
+                onClick={() => setStartOpen(true)}
+            />
             <ClearableDatePicker
                 open={dueOpen}
                 date={props.due}
