@@ -2,7 +2,6 @@ import React from 'react';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import CheckIcon from '@material-ui/icons/Check';
 import PlayIcon from '@material-ui/icons/PlayArrow';
-import { IconButton } from '@material-ui/core';
 import { DelegateTaskIcon, DeleteDelegationIcon } from './Icons';
 import { IconStateButton } from './IconStateButton';
 
