@@ -12,14 +12,10 @@ import {
     FormHelperText,
     Paper,
     Select,
-    MenuItem,
-    Dialog,
-    DialogTitle,
-    IconButton
+    MenuItem
 } from '@material-ui/core';
 import { orange } from '@material-ui/core/colors';
 import SaveIcon from '@material-ui/icons/Save';
-import CheckIcon from '@material-ui/icons/Check';
 import CancelIcon from '@material-ui/icons/Cancel';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import { ResponsiveButton } from './ResponsiveButton';
@@ -32,6 +28,7 @@ import { ITaskAction, Dispatcher } from '../util/dispatcher';
 import { GlobalState } from '../model/GlobalState';
 import { FinishPostponeDelegateButtons } from './FinishPostponeDelegateButtons';
 import { StartDueButtons } from './StartDueButtons';
+import { DelegateInputDialog } from './DelegateInputDialog';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -98,7 +95,6 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
         new ValidationResult()
     );
     const [delegateRequest, setDelegateRequest] = useState(false);
-    const [delegate, setDelegate] = useState<string | undefined>(undefined);
     const handleChange = (name: keyof Task) => {
         return (ev: React.ChangeEvent<HTMLInputElement>) => {
             setEditedTask(copyAndUpdate(editedTask, name, ev.target.value));
@@ -356,38 +352,16 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                             />
                         </ButtonGroup>
                     </FormControl>
-                    <Dialog
+                    <DelegateInputDialog
                         open={delegateRequest}
-                        onClose={() => setDelegateRequest(false)}>
-                        <DialogTitle>
-                            Who is responsible for this task?
-                        </DialogTitle>
-                        <FormControl>
-                            <InputLabel htmlFor='delegate'>Delegate</InputLabel>
-                            <Input
-                                id='delegate'
-                                value={delegate || ''}
-                                placeholder='Delegate'
-                                onChange={ev => setDelegate(ev.target.value)}
-                            />
-                        </FormControl>
-                        <ButtonGroup>
-                            <IconButton
-                                onClick={() => {
-                                    setEditedTask({
-                                        ...editedTask,
-                                        delegatedTo: delegate
-                                    });
-                                    setDelegateRequest(false);
-                                }}>
-                                <CheckIcon />
-                            </IconButton>
-                            <IconButton
-                                onClick={() => setDelegateRequest(false)}>
-                                <CancelIcon />
-                            </IconButton>
-                        </ButtonGroup>
-                    </Dialog>
+                        onNewDelegate={newDelegate =>
+                            setEditedTask({
+                                ...editedTask,
+                                delegatedTo: newDelegate
+                            })
+                        }
+                        onClose={() => setDelegateRequest(false)}
+                    />
                 </Fragment>
             )}
         </GlobalState.Consumer>
