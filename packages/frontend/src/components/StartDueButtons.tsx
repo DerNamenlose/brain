@@ -3,6 +3,7 @@ import { IconButton } from '@material-ui/core';
 import AlarmOnIcon from '@material-ui/icons/AlarmOn';
 import { TaskStart } from './Icons';
 import { ClearableDatePicker } from './ClearableDatePicker';
+import { useStyles } from './styles';
 
 export function StartDueButtons(props: {
     due?: Date;
@@ -10,6 +11,7 @@ export function StartDueButtons(props: {
     onDueChange: (due?: Date) => void;
     onStartChange: (start?: Date) => void;
 }) {
+    const classes = useStyles();
     const [dueOpen, setDueOpen] = useState(false);
     const [startOpen, setStartOpen] = useState(false);
     return (
@@ -27,12 +29,7 @@ export function StartDueButtons(props: {
                 onClick={() => {
                     setDueOpen(true);
                 }}>
-                <AlarmOnIcon
-                    style={{
-                        fontSize: '3rem',
-                        color: 'white'
-                    }}
-                />
+                <AlarmOnIcon className={classes.buttonIcon} />
             </IconButton>
             <IconButton
                 style={{
@@ -42,12 +39,7 @@ export function StartDueButtons(props: {
                 onClick={() => {
                     setStartOpen(true);
                 }}>
-                <TaskStart
-                    style={{
-                        color: 'white',
-                        fontSize: '3rem'
-                    }}
-                />
+                <TaskStart className={classes.buttonIcon} />
             </IconButton>
             <ClearableDatePicker
                 open={dueOpen}

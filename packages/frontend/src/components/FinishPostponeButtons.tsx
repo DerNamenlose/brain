@@ -3,8 +3,10 @@ import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import CheckIcon from '@material-ui/icons/Check';
 import PlayIcon from '@material-ui/icons/PlayArrow';
 import { IconButton } from '@material-ui/core';
+import { useStyles } from './styles';
 
 function PostponeButton(props: { isPostponed: boolean; onClick: () => void }) {
+    const classes = useStyles();
     if (!props.isPostponed) {
         return (
             <IconButton
@@ -13,12 +15,7 @@ function PostponeButton(props: { isPostponed: boolean; onClick: () => void }) {
                     margin: '0.5rem'
                 }}
                 onClick={props.onClick}>
-                <AllInclusiveIcon
-                    style={{
-                        fontSize: '3rem',
-                        color: 'white'
-                    }}
-                />
+                <AllInclusiveIcon className={classes.buttonIcon} />
             </IconButton>
         );
     }
@@ -29,12 +26,7 @@ function PostponeButton(props: { isPostponed: boolean; onClick: () => void }) {
                 margin: '0.5rem'
             }}
             onClick={props.onClick}>
-            <PlayIcon
-                style={{
-                    fontSize: '3rem',
-                    color: 'white'
-                }}
-            />
+            <PlayIcon className={classes.buttonIcon} />
         </IconButton>
     );
 }
@@ -45,6 +37,7 @@ export function FinishPostponeButtons(props: {
     onPostponedChange: () => void;
     onDoneChange: () => void;
 }) {
+    const classes = useStyles();
     return (
         <div
             style={{
@@ -64,12 +57,7 @@ export function FinishPostponeButtons(props: {
                     margin: '0.5rem'
                 }}
                 onClick={props.onDoneChange}>
-                <CheckIcon
-                    style={{
-                        fontSize: '3rem',
-                        color: 'white'
-                    }}
-                />
+                <CheckIcon className={classes.buttonIcon} />
             </IconButton>
         </div>
     );
