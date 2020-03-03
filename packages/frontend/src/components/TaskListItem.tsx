@@ -23,7 +23,7 @@ import {
 } from '@material-ui/core/colors';
 import { formatDistance } from 'date-fns';
 import { toDateDisplay } from '../util/displayHelper';
-import { TaskStartIcon } from './Icons';
+import { TaskStartIcon, DelegateTaskIcon } from './Icons';
 
 const useStyles = makeStyles(theme =>
     createStyles({
@@ -197,6 +197,14 @@ function MetaDisplay(props: { task: Task }) {
                     created={new Date(props.task.created)}
                     task={props.task}
                 />
+            )}{' '}
+            {props.task.delegatedTo && (
+                <span className={classes.metaText}>
+                    <DelegateTaskIcon fontSize='inherit' />
+                    <span className={classes.metaText}>
+                        {props.task.delegatedTo}
+                    </span>
+                </span>
             )}
         </Fragment>
     );
