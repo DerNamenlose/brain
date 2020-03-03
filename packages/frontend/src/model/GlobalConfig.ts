@@ -34,4 +34,8 @@ export interface IGlobalConfig {
      * Show only tasks with these tags (empty: show all tasks)
      */
     selectedTags: string[];
+    /**
+     * Show only tasks delegated to these people
+     */
+    selectedDelegates: string[];
 }

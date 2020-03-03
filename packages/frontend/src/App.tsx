@@ -46,7 +46,8 @@ const App: React.FC = () => {
             showDone: false,
             selectedContexts: [] as string[],
             selectedProjects: [] as string[],
-            selectedTags: [] as string[]
+            selectedTags: [] as string[],
+            selectedDelegates: [] as string[]
         }
     } as IGlobalState);
     useEffect(() => {

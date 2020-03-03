@@ -7,6 +7,7 @@ export interface IGlobalState {
     contexts: string[];
     projects: string[];
     tags: string[];
+    delegates: string[];
     inboxEmpty: boolean;
     somedayMaybeEmpty: boolean;
     config: IGlobalConfig;

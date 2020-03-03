@@ -18,6 +18,7 @@ import { TaskList } from './TaskList';
 import { DueFilters } from './DueFilters';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useHistory } from 'react-router';
+import { DelegateButton } from './DelegateButton';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -85,6 +86,7 @@ export function TaskOverview() {
                             <ProjectsButton />
                             <TagsButton />
                             <DueFilters />
+                            <DelegateButton />
                             <Button
                                 className={classes.settings}
                                 onClick={() => history.push('/config')}>

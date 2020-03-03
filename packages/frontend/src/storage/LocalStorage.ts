@@ -61,7 +61,8 @@ export class LocalStorage {
                 showFutureStart: false,
                 selectedContexts: [],
                 selectedProjects: [],
-                selectedTags: []
+                selectedTags: [],
+                selectedDelegates: []
             }
         );
     }

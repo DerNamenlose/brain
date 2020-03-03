@@ -30,7 +30,7 @@ export function taskAction(
 }
 
 export interface IFilterAction {
-    type: 'context' | 'project' | 'tag';
+    type: 'context' | 'project' | 'tag' | 'delegate';
     subtype: 'select' | 'deselect';
     name: string;
 }
@@ -67,6 +67,9 @@ function handleFilterAction(
         case 'tag':
             items = [...newState.config.selectedTags];
             break;
+        case 'delegate':
+            items = [...newState.config.selectedDelegates];
+            break;
     }
     switch (action.subtype) {
         case 'select':
@@ -90,6 +93,8 @@ function handleFilterAction(
         case 'tag':
             newState.config.selectedTags = items;
             break;
+        case 'delegate':
+            newState.config.selectedDelegates = items;
     }
     return newState;
 }
@@ -176,6 +181,7 @@ export function reduce(
         case 'context':
         case 'project':
         case 'tag':
+        case 'delegate':
             newState = handleFilterAction(newState, action as IFilterAction);
             break;
         case 'task':
@@ -215,6 +221,7 @@ export function reduce(
     newState.contexts = extractContexts(newState.tasks, newState.config);
     newState.projects = extractProjects(newState.tasks, newState.config);
     newState.tags = extractTags(newState.tasks, newState.config);
+    newState.delegates = extractDelegates(newState.tasks, newState.config);
     newState.config.selectedContexts = newState.config.selectedContexts.filter(
         sctx => !!newState.contexts.find(ctx => sctx === ctx)
     );
@@ -223,6 +230,9 @@ export function reduce(
     );
     newState.config.selectedTags = newState.config.selectedTags.filter(
         st => !!newState.tags.find(t => t === st)
+    );
+    newState.config.selectedDelegates = newState.config.selectedDelegates?.filter(
+        st => !!newState.delegates.find(t => t === st)
     );
     storage.putConfig(newState.config);
     newState.inboxEmpty =
@@ -253,6 +263,16 @@ function extractTags(tasks: Task[], config: IGlobalConfig): string[] {
         tasks
             .filter(task => config.showDone || !task.done)
             .flatMap(task => task.tags || [])
+    );
+}
+
+function extractDelegates(tasks: Task[], config: IGlobalConfig): string[] {
+    return sortAndUniqueString(
+        tasks
+            .filter(
+                task => !!task.delegatedTo && (config.showDone || !task.done)
+            )
+            .map(task => task.delegatedTo || '')
     );
 }
 
