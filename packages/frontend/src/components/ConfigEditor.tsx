@@ -27,56 +27,53 @@ export function ConfigEditor() {
     const classes = useStyles();
     const dispatch = useContext(Dispatcher);
     const history = useHistory();
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <Fragment>
-                    <div className={classes.backButtonRoot}>
-                        <Button
-                            className={classes.backButton}
-                            onClick={() => history.goBack()}>
-                            <ChevronLeftIcon fontSize='large' />
-                        </Button>
-                    </div>
-                    <h1>Configuration</h1>
-                    <FormControl>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    id='showDone'
-                                    checked={state.config.showDone}
-                                    onChange={ev =>
-                                        dispatch({
-                                            type: 'config',
-                                            setting: 'showDone',
-                                            value: ev.target.checked
-                                        })
-                                    }
-                                />
+        <Fragment>
+            <div className={classes.backButtonRoot}>
+                <Button
+                    className={classes.backButton}
+                    onClick={() => history.goBack()}>
+                    <ChevronLeftIcon fontSize='large' />
+                </Button>
+            </div>
+            <h1>Configuration</h1>
+            <FormControl>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            id='showDone'
+                            checked={state.config.showDone}
+                            onChange={ev =>
+                                dispatch({
+                                    type: 'config',
+                                    setting: 'showDone',
+                                    value: ev.target.checked
+                                })
                             }
-                            label='Show finished tasks'
                         />
-                    </FormControl>
-                    <FormControl>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    id='showFutureStart'
-                                    checked={!!state.config.showFutureStart}
-                                    onChange={ev =>
-                                        dispatch({
-                                            type: 'config',
-                                            setting: 'showFutureStart',
-                                            value: ev.target.checked
-                                        })
-                                    }
-                                />
+                    }
+                    label='Show finished tasks'
+                />
+            </FormControl>
+            <FormControl>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            id='showFutureStart'
+                            checked={!!state.config.showFutureStart}
+                            onChange={ev =>
+                                dispatch({
+                                    type: 'config',
+                                    setting: 'showFutureStart',
+                                    value: ev.target.checked
+                                })
                             }
-                            label='Show tasks with a start date in the future'
                         />
-                    </FormControl>
-                </Fragment>
-            )}
-        </GlobalState.Consumer>
+                    }
+                    label='Show tasks with a start date in the future'
+                />
+            </FormControl>
+        </Fragment>
     );
 }

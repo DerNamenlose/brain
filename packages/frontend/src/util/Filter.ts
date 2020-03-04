@@ -36,6 +36,9 @@ export function overviewFilter(config: IGlobalConfig, tasks: Task[]): Task[] {
                 matches(config.selectedContexts, task.contexts) &&
                 matches(config.selectedProjects, task.projects) &&
                 matches(config.selectedTags, task.tags) &&
+                matches(config.selectedDelegates, [
+                    task.delegatedTo || '<me>'
+                ]) &&
                 isDueIn(task, today, config.dueIn)
             );
         })

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import React from 'react';
 import { GlobalState } from '../model/GlobalState';
 import { TaskList } from './TaskList';
@@ -25,24 +25,19 @@ const useStyles = makeStyles(() =>
 export function SomedayMaybe() {
     const classes = useStyles();
     const history = useHistory();
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <Fragment>
-                    <TaskList
-                        tasks={somedayMaybeFilter(state.config, state.tasks)}
-                    />
-                    <AppBar className={classes.appBar}>
-                        <Toolbar>
-                            <Button
-                                className={classes.settings}
-                                onClick={() => history.push('/config')}>
-                                <SettingsIcon className={classes.settings} />
-                            </Button>
-                        </Toolbar>
-                    </AppBar>
-                </Fragment>
-            )}
-        </GlobalState.Consumer>
+        <Fragment>
+            <TaskList tasks={somedayMaybeFilter(state.config, state.tasks)} />
+            <AppBar className={classes.appBar}>
+                <Toolbar>
+                    <Button
+                        className={classes.settings}
+                        onClick={() => history.push('/config')}>
+                        <SettingsIcon className={classes.settings} />
+                    </Button>
+                </Toolbar>
+            </AppBar>
+        </Fragment>
     );
 }
