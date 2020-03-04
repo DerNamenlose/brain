@@ -12,38 +12,29 @@ import { Badge } from '@material-ui/core';
  */
 export function ContextsButton() {
     const dispatch = useContext(Dispatcher);
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <FilterButton
-                    icon={
-                        <Badge
-                            invisible={
-                                state.config.selectedContexts.length === 0
-                            }
-                            color='secondary'
-                            variant='dot'>
-                            <LandscapeIcon />
-                        </Badge>
-                    }
-                    text='Contexts'
-                    entries={state.contexts.map(ctx => ({
-                        text: ctx,
-                        selected: !!state.config.selectedContexts.find(
-                            c => c === ctx
-                        )
-                    }))}
-                    onChange={selectedEntry => {
-                        dispatch({
-                            type: 'context',
-                            subtype: selectedEntry.selected
-                                ? 'deselect'
-                                : 'select',
-                            name: selectedEntry.text
-                        } as IFilterAction);
-                    }}
-                />
-            )}
-        </GlobalState.Consumer>
+        <FilterButton
+            icon={
+                <Badge
+                    invisible={state.config.selectedContexts.length === 0}
+                    color='secondary'
+                    variant='dot'>
+                    <LandscapeIcon />
+                </Badge>
+            }
+            text='Contexts'
+            entries={state.contexts.map(ctx => ({
+                text: ctx,
+                selected: !!state.config.selectedContexts.find(c => c === ctx)
+            }))}
+            onChange={selectedEntry => {
+                dispatch({
+                    type: 'context',
+                    subtype: selectedEntry.selected ? 'deselect' : 'select',
+                    name: selectedEntry.text
+                } as IFilterAction);
+            }}
+        />
     );
 }

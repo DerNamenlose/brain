@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import React from 'react';
 import {
     AppBar,
@@ -76,29 +76,24 @@ const useStyles = makeStyles((theme: Theme) =>
 export function TaskOverview() {
     const classes = useStyles();
     const history = useHistory();
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <Fragment>
-                    <AppBar className={classes.appBar}>
-                        <Toolbar>
-                            <ContextsButton />
-                            <ProjectsButton />
-                            <TagsButton />
-                            <DueFilters />
-                            <DelegateButton />
-                            <Button
-                                className={classes.settings}
-                                onClick={() => history.push('/config')}>
-                                <SettingsIcon className={classes.settings} />
-                            </Button>
-                        </Toolbar>
-                    </AppBar>
-                    <TaskList
-                        tasks={overviewFilter(state.config, state.tasks)}
-                    />
-                </Fragment>
-            )}
-        </GlobalState.Consumer>
+        <Fragment>
+            <AppBar className={classes.appBar}>
+                <Toolbar>
+                    <ContextsButton />
+                    <ProjectsButton />
+                    <TagsButton />
+                    <DueFilters />
+                    <DelegateButton />
+                    <Button
+                        className={classes.settings}
+                        onClick={() => history.push('/config')}>
+                        <SettingsIcon className={classes.settings} />
+                    </Button>
+                </Toolbar>
+            </AppBar>
+            <TaskList tasks={overviewFilter(state.config, state.tasks)} />
+        </Fragment>
     );
 }

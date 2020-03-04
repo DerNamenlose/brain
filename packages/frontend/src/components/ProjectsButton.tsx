@@ -7,38 +7,31 @@ import { Badge } from '@material-ui/core';
 
 export function ProjectsButton() {
     const dispatch = useContext(Dispatcher);
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <FilterButton
-                    icon={
-                        <Badge
-                            invisible={
-                                state.config.selectedProjects.length === 0
-                            }
-                            color='secondary'
-                            variant='dot'>
-                            <TableChartIcon />
-                        </Badge>
-                    }
-                    text='Projects'
-                    entries={state.projects.map(project => ({
-                        text: project,
-                        selected: !!state.config.selectedProjects.find(
-                            p => p === project
-                        )
-                    }))}
-                    onChange={selectedEntry => {
-                        dispatch({
-                            type: 'project',
-                            subtype: selectedEntry.selected
-                                ? 'deselect'
-                                : 'select',
-                            name: selectedEntry.text
-                        } as IFilterAction);
-                    }}
-                />
-            )}
-        </GlobalState.Consumer>
+        <FilterButton
+            icon={
+                <Badge
+                    invisible={state.config.selectedProjects.length === 0}
+                    color='secondary'
+                    variant='dot'>
+                    <TableChartIcon />
+                </Badge>
+            }
+            text='Projects'
+            entries={state.projects.map(project => ({
+                text: project,
+                selected: !!state.config.selectedProjects.find(
+                    p => p === project
+                )
+            }))}
+            onChange={selectedEntry => {
+                dispatch({
+                    type: 'project',
+                    subtype: selectedEntry.selected ? 'deselect' : 'select',
+                    name: selectedEntry.text
+                } as IFilterAction);
+            }}
+        />
     );
 }

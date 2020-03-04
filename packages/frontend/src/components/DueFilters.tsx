@@ -8,64 +8,59 @@ import { Dispatcher } from '../util/dispatcher';
 
 export function DueFilters() {
     const dispatch = useContext(Dispatcher);
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <FilterButton
-                    icon={
-                        <Badge
-                            invisible={state.config.dueIn === undefined}
-                            color='secondary'
-                            variant='dot'>
-                            <WatchLaterIcon />
-                        </Badge>
-                    }
-                    text='Due'
-                    entries={[
-                        {
-                            text: 'Overdue',
-                            selected: !!(
-                                state.config.dueIn !== undefined &&
-                                state.config.dueIn === 0
-                            ),
-                            value: 0
-                        },
-                        {
-                            text: 'Today',
-                            selected: !!(
-                                state.config.dueIn !== undefined &&
-                                state.config.dueIn === 1
-                            ),
-                            value: 1
-                        },
-                        {
-                            text: 'Next week',
-                            selected: !!(
-                                state.config.dueIn !== undefined &&
-                                state.config.dueIn === 7
-                            ),
-                            value: 7
-                        },
-                        {
-                            text: 'Next month',
-                            selected: !!(
-                                state.config.dueIn !== undefined &&
-                                state.config.dueIn === 31
-                            ),
-                            value: 31
-                        }
-                    ]}
-                    onChange={selectedEntry => {
-                        dispatch({
-                            type: 'due',
-                            subtype: selectedEntry.selected
-                                ? 'deselect'
-                                : 'select',
-                            value: selectedEntry.value
-                        });
-                    }}
-                />
-            )}
-        </GlobalState.Consumer>
+        <FilterButton
+            icon={
+                <Badge
+                    invisible={state.config.dueIn === undefined}
+                    color='secondary'
+                    variant='dot'>
+                    <WatchLaterIcon />
+                </Badge>
+            }
+            text='Due'
+            entries={[
+                {
+                    text: 'Overdue',
+                    selected: !!(
+                        state.config.dueIn !== undefined &&
+                        state.config.dueIn === 0
+                    ),
+                    value: 0
+                },
+                {
+                    text: 'Today',
+                    selected: !!(
+                        state.config.dueIn !== undefined &&
+                        state.config.dueIn === 1
+                    ),
+                    value: 1
+                },
+                {
+                    text: 'Next week',
+                    selected: !!(
+                        state.config.dueIn !== undefined &&
+                        state.config.dueIn === 7
+                    ),
+                    value: 7
+                },
+                {
+                    text: 'Next month',
+                    selected: !!(
+                        state.config.dueIn !== undefined &&
+                        state.config.dueIn === 31
+                    ),
+                    value: 31
+                }
+            ]}
+            onChange={selectedEntry => {
+                dispatch({
+                    type: 'due',
+                    subtype: selectedEntry.selected ? 'deselect' : 'select',
+                    value: selectedEntry.value
+                });
+            }}
+        />
     );
 }

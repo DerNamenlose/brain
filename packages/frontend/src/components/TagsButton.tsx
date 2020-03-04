@@ -12,36 +12,29 @@ import { Badge } from '@material-ui/core';
  */
 export function TagsButton() {
     const dispatch = useContext(Dispatcher);
+    const state = useContext(GlobalState);
     return (
-        <GlobalState.Consumer>
-            {state => (
-                <FilterButton
-                    icon={
-                        <Badge
-                            invisible={state.config.selectedTags.length === 0}
-                            color='secondary'
-                            variant='dot'>
-                            <LocalOfferIcon />
-                        </Badge>
-                    }
-                    text='Tags'
-                    entries={state.tags.map(tag => ({
-                        text: tag,
-                        selected: !!state.config.selectedTags.find(
-                            t => t === tag
-                        )
-                    }))}
-                    onChange={selectedEntry => {
-                        dispatch({
-                            type: 'tag',
-                            subtype: selectedEntry.selected
-                                ? 'deselect'
-                                : 'select',
-                            name: selectedEntry.text
-                        } as IFilterAction);
-                    }}
-                />
-            )}
-        </GlobalState.Consumer>
+        <FilterButton
+            icon={
+                <Badge
+                    invisible={state.config.selectedTags.length === 0}
+                    color='secondary'
+                    variant='dot'>
+                    <LocalOfferIcon />
+                </Badge>
+            }
+            text='Tags'
+            entries={state.tags.map(tag => ({
+                text: tag,
+                selected: !!state.config.selectedTags.find(t => t === tag)
+            }))}
+            onChange={selectedEntry => {
+                dispatch({
+                    type: 'tag',
+                    subtype: selectedEntry.selected ? 'deselect' : 'select',
+                    name: selectedEntry.text
+                } as IFilterAction);
+            }}
+        />
     );
 }
