@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import React from 'react';
 import {
     AppBar,
@@ -6,7 +6,10 @@ import {
     makeStyles,
     createStyles,
     Theme,
-    Button
+    Button,
+    SwipeableDrawer,
+    Hidden,
+    Badge
 } from '@material-ui/core';
 import { ContextsButton } from './ContextsButton';
 import { ProjectsButton } from './ProjectsButton';
@@ -17,6 +20,7 @@ import { GlobalState } from '../model/GlobalState';
 import { TaskList } from './TaskList';
 import { DueFilters } from './DueFilters';
 import SettingsIcon from '@material-ui/icons/Settings';
+import FilterListIcon from '@material-ui/icons/FilterList';
 import { useHistory } from 'react-router';
 import { DelegateButton } from './DelegateButton';
 
@@ -77,15 +81,55 @@ export function TaskOverview() {
     const classes = useStyles();
     const history = useHistory();
     const state = useContext(GlobalState);
+    const [sliderOpen, setSliderOpen] = useState(false);
     return (
         <Fragment>
+            <Hidden smUp>
+                <SwipeableDrawer
+                    anchor='bottom'
+                    onOpen={() => setSliderOpen(true)}
+                    onClose={() => setSliderOpen(false)}
+                    open={sliderOpen}>
+                    <div
+                        style={{
+                            marginBottom: '1rem',
+                            marginTop: '1rem'
+                        }}>
+                        <ContextsButton />
+                        <ProjectsButton />
+                        <TagsButton />
+                        <DueFilters />
+                        <DelegateButton />
+                    </div>
+                </SwipeableDrawer>
+            </Hidden>
             <AppBar className={classes.appBar}>
                 <Toolbar>
-                    <ContextsButton />
-                    <ProjectsButton />
-                    <TagsButton />
-                    <DueFilters />
-                    <DelegateButton />
+                    <Hidden xsDown>
+                        <ContextsButton />
+                        <ProjectsButton />
+                        <TagsButton />
+                        <DueFilters />
+                        <DelegateButton />
+                    </Hidden>
+                    <Hidden smUp>
+                        <Button onClick={() => setSliderOpen(true)}>
+                            <Badge
+                                invisible={
+                                    state.config.selectedContexts.length ===
+                                        0 &&
+                                    state.config.selectedDelegates.length ===
+                                        0 &&
+                                    state.config.selectedProjects.length ===
+                                        0 &&
+                                    state.config.selectedTags.length === 0
+                                }
+                                color='secondary'
+                                variant='dot'>
+                                <FilterListIcon />
+                            </Badge>
+                        </Button>
+                    </Hidden>
                     <Button
                         className={classes.settings}
                         onClick={() => history.push('/config')}>
