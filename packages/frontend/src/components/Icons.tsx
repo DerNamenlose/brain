@@ -15,18 +15,8 @@ export function DelegateTaskIcon(props: SvgIconProps) {
         <SvgIcon {...props}>
             <path d='M 8,21 h 14 C 22 10, 8 10, 8 21 z' />
             <circle cx='15' cy='5' r='4' />
-            <path
-                d='M 5,8 L 9,12 5,16'
-                strokeWidth='1.5'
-                stroke='white'
-                fill='none'
-            />
-            <path
-                d='M 1,8 L 5,12 1,16'
-                strokeWidth='1.5'
-                stroke='white'
-                fill='none'
-            />
+            <path d='M 5.5,7.25 L 10.25,12 5.5,16.75 4.25,15.5 7.75,12 4.25,8.5 5.5,7.25 z' />
+            <path d='M 1.25,7.25 L 6,12 1.25,16.75 0,15.5 3.5,12 0,8.5 1.25,7.25 z' />
         </SvgIcon>
     );
 }
