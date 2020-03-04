@@ -221,9 +221,10 @@ export function reduce(
     newState.contexts = extractContexts(newState.tasks, newState.config);
     newState.projects = extractProjects(newState.tasks, newState.config);
     newState.tags = extractTags(newState.tasks, newState.config);
-    newState.delegates = ['<me>'].concat(
-        extractDelegates(newState.tasks, newState.config)
-    );
+    newState.delegates = extractDelegates(newState.tasks, newState.config);
+    if (newState.delegates.length !== 0) {
+        newState.delegates = ['<me>'].concat(newState.delegates);
+    }
     newState.config.selectedContexts = newState.config.selectedContexts.filter(
         sctx => !!newState.contexts.find(ctx => sctx === ctx)
     );
