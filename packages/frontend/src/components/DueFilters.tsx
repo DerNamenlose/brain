@@ -54,6 +54,7 @@ export function DueFilters() {
                     value: 31
                 }
             ]}
+            autoClose
             onChange={selectedEntry => {
                 dispatch({
                     type: 'due',
