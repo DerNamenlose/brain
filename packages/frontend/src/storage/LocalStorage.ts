@@ -78,19 +78,22 @@ export class LocalStorage implements ILocalStorage {
 
     public async config(): Promise<IGlobalConfig> {
         const db = await this.openDb();
-        return (
-            (await db
-                .transaction('config')
-                .objectStore('config')
-                .get('global')) || {
-                id: 'global',
-                showDone: false,
-                showFutureStart: false,
-                selectedContexts: [],
-                selectedProjects: [],
-                selectedTags: []
-            }
-        );
+        const existingConfig = (await db
+            .transaction('config')
+            .objectStore('config')
+            .get('global')) || {
+            id: 'global',
+            showDone: false,
+            showFutureStart: false,
+            selectedContexts: [],
+            selectedProjects: [],
+            selectedTags: [],
+            selectedDelegates: []
+        };
+        if (existingConfig.selectedDelegates === undefined) {
+            existingConfig.selectedDelegates = [];
+        }
+        return existingConfig;
     }
 
     public async putConfig(config: IGlobalConfig): Promise<void> {

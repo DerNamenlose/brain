@@ -13,6 +13,7 @@ export interface FilterButtonProps<T> {
     icon: JSX.Element;
     text: string;
     onChange?: (selectedEntry: FilterEntry<T>) => void;
+    autoClose?: boolean;
 }
 
 export function FilterButton<T>(props: FilterButtonProps<T>) {
@@ -41,7 +42,9 @@ export function FilterButton<T>(props: FilterButtonProps<T>) {
                         key={entry.text}
                         onClick={() => {
                             props.onChange && props.onChange(entry);
-                            setAnchorEl(null);
+                            if (!!props.autoClose) {
+                                setAnchorEl(null);
+                            }
                         }}
                         selected={entry.selected}>
                         <ListItemIcon>{props.icon}</ListItemIcon>

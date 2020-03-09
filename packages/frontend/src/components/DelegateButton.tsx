@@ -4,30 +4,35 @@ import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
 import { IFilterAction, Dispatcher } from '../util/dispatcher';
 import { Badge } from '@material-ui/core';
+import { DelegateTaskIcon } from './Icons';
 
-export function ProjectsButton() {
+export function DelegateButton() {
     const dispatch = useContext(Dispatcher);
     const state = useContext(GlobalState);
     return (
         <FilterButton
             icon={
                 <Badge
-                    invisible={state.config.selectedProjects.length === 0}
+                    invisible={
+                        (state.config.selectedDelegates?.length || 0) === 0
+                    }
                     color='secondary'
                     variant='dot'>
-                    <TableChartIcon />
+                    <DelegateTaskIcon />
                 </Badge>
             }
-            text='Projects'
-            entries={state.projects.map(project => ({
-                text: project,
-                selected: !!state.config.selectedProjects.find(
-                    p => p === project
-                )
-            }))}
+            text='Delegated to'
+            entries={
+                state.delegates?.map(delegate => ({
+                    text: delegate,
+                    selected: !!state.config.selectedDelegates?.find(
+                        d => d === delegate
+                    )
+                })) || []
+            }
             onChange={selectedEntry => {
                 dispatch({
-                    type: 'project',
+                    type: 'delegate',
                     subtype: selectedEntry.selected ? 'deselect' : 'select',
                     name: selectedEntry.text
                 } as IFilterAction);
