@@ -11,6 +11,13 @@ const localeMap: Map<string, any> = new Map();
 localeMap.set('en-GB', enGB);
 localeMap.set('en-US', enUS);
 localeMap.set('en', enGB);
+localeMap.set('de-DE', de);
+localeMap.set('de-AT', de);
+localeMap.set('de-CH', de);
+localeMap.set('de-BE', de);
+localeMap.set('de-IT', de);
+localeMap.set('de-LI', de);
+localeMap.set('de-LU', de);
 localeMap.set('de', de);
 localeMap.set('fr', fr);
 
