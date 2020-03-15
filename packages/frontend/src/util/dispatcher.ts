@@ -5,6 +5,7 @@ import { sortAndUniqueString } from './order';
 import { LocalStorage } from '../storage/LocalStorage';
 import { inboxFilter, somedayMaybeFilter } from './Filter';
 import { IGlobalConfig } from '../model/GlobalConfig';
+import { triggerCleanup } from './cleanup';
 
 export interface ITaskAction {
     type: 'task';
@@ -242,6 +243,9 @@ export function reduce(
         inboxFilter(newState.config, newState.tasks).length === 0;
     newState.somedayMaybeEmpty =
         somedayMaybeFilter(newState.config, newState.tasks).length === 0;
+    if (!!newState.config.taskCleanupDays) {
+        triggerCleanup(newState.config.taskCleanupDays, storage);
+    }
     return newState;
 }
 

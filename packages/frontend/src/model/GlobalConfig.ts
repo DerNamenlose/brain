@@ -15,6 +15,12 @@ export interface IGlobalConfig {
      */
     showFutureStart: boolean;
 
+    /**
+     * if set, finished tasks, that are older than the given number
+     * of days are cleaned from the storage
+     */
+    taskCleanupDays?: number;
+
     // Filters. If multiple filters (e.g. selectedContexts and selectedProjects) are set, tasks
     //  have to fulfill both filters. If individual filters have more than one entry (e.g. more
     //  than one context, tasks have to fulfill at least one of the entries)

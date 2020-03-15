@@ -20,6 +20,7 @@ export interface Task {
     version: number; // a version number indicating the relative age of the element
     hash: string; // a hash used for detecting collisions during updates
     start?: number; // the earliest day a task is to be started
+    finishedOn?: number; // the date, this task was finished on -> used to do the cleanup
 }
 
 /**
