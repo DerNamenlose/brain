@@ -152,7 +152,10 @@ export function TaskEditorControl(props: TaskEditorControlProps) {
                             onDoneChange={() =>
                                 setEditedTask({
                                     ...editedTask,
-                                    done: !editedTask.done
+                                    done: !editedTask.done,
+                                    finishedOn: !editedTask.done
+                                        ? Date.now()
+                                        : undefined // condition seems to be the wron way aroung, because we're referring to the old state
                                 })
                             }
                             onPostponedChange={() =>

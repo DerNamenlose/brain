@@ -139,4 +139,10 @@ export class LocalStorage {
     private static async upgradeV3(db: IDBPDatabase<TaskDBSchema>) {
         db.createObjectStore('config', { keyPath: 'id' });
     }
+
+    public async deleteTask(id: string) {
+        const db = await this.openDb();
+        const transaction = db.transaction('tasks', 'readwrite');
+        await transaction.objectStore('tasks').delete(id);
+    }
 }
