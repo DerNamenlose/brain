@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import TableChartIcon from '@material-ui/icons/TableChart';
 import { FilterButton } from './FilterButton';
 import { GlobalState } from '../model/GlobalState';
 import { IFilterAction, Dispatcher } from '../util/dispatcher';
